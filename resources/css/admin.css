@@ -1,0 +1,182 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+    --admin-sidebar-width: 270px;
+    --admin-sidebar-bg: #111827;
+    --admin-sidebar-muted: #9ca3af;
+    --admin-sidebar-active: #2563eb;
+}
+
+body {
+    background: #f3f6fb;
+    color: #1f2937;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.admin-sidebar {
+    background: var(--admin-sidebar-bg);
+    height: 100vh;
+    left: 0;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    transition: transform 0.25s ease;
+    width: var(--admin-sidebar-width);
+    z-index: 1040;
+}
+
+.admin-brand {
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
+    display: flex;
+    font-size: 1.15rem;
+    font-weight: 700;
+    gap: 0.75rem;
+    min-height: 72px;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+}
+
+.admin-brand:hover {
+    color: #fff;
+}
+
+.admin-brand-mark {
+    align-items: center;
+    background: var(--admin-sidebar-active);
+    border-radius: 0.65rem;
+    display: inline-flex;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+
+.admin-nav-label {
+    color: #6b7280;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 1.5rem 1.25rem 0.5rem;
+    text-transform: uppercase;
+}
+
+.admin-sidebar .nav-link {
+    align-items: center;
+    border-radius: 0.6rem;
+    color: var(--admin-sidebar-muted);
+    display: flex;
+    font-weight: 500;
+    gap: 0.75rem;
+    margin: 0.2rem 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: var(--admin-sidebar-active);
+    color: #fff;
+}
+
+.admin-sidebar .nav-link svg {
+    flex: 0 0 auto;
+    height: 20px;
+    width: 20px;
+}
+
+.admin-main {
+    margin-left: var(--admin-sidebar-width);
+    min-height: 100vh;
+}
+
+.admin-header {
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    height: 72px;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.admin-content {
+    padding: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.content-card {
+    border: 0;
+    border-radius: 0.85rem;
+    box-shadow: 0 0.25rem 1.25rem rgba(15, 23, 42, 0.06);
+}
+
+.content-card .card-header {
+    background: #fff;
+    border-bottom-color: #eef0f3;
+    padding: 1.15rem 1.25rem;
+}
+
+.stat-icon {
+    align-items: center;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    height: 48px;
+    justify-content: center;
+    width: 48px;
+}
+
+.image-preview {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.65rem;
+    max-height: 90px;
+    max-width: 220px;
+    object-fit: contain;
+    padding: 0.5rem;
+}
+
+.sidebar-overlay {
+    background: rgba(15, 23, 42, 0.5);
+    display: none;
+    inset: 0;
+    position: fixed;
+    z-index: 1030;
+}
+
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .admin-main {
+        margin-left: 0;
+    }
+
+    body.sidebar-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .admin-header,
+    .admin-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.25rem;
+    }
+}
