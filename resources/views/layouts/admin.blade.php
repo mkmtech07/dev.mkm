@@ -62,6 +62,80 @@
                     </svg>
                     Services
                 </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.about.*') ? 'active' : '' }}"
+                   href="{{ route('admin.about.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 21a8 8 0 0 1 16 0"/>
+                    </svg>
+                    About Us
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.gallery.*') ? 'active' : '' }}"
+                   href="{{ route('admin.gallery.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                        <circle cx="8.5" cy="9" r="1.5"/>
+                        <path d="m3 16 5-4 4 3 3-2 6 4"/>
+                    </svg>
+                    Gallery
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }}"
+                   href="{{ route('admin.testimonials.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 5h16v11H8l-4 4z"/>
+                        <path d="M8 9h8M8 12h5"/>
+                    </svg>
+                    Testimonials
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.team-members.*') ? 'active' : '' }}"
+                   href="{{ route('admin.team-members.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="9" cy="8" r="3"/>
+                        <circle cx="17" cy="10" r="2"/>
+                        <path d="M3 20a6 6 0 0 1 12 0M14 16a5 5 0 0 1 7 4"/>
+                    </svg>
+                    Team Members
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}"
+                   href="{{ route('admin.pages.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M6 2h8l4 4v16H6z"/>
+                        <path d="M14 2v5h5M9 12h6M9 16h6"/>
+                    </svg>
+                    Pages
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}"
+                   href="{{ route('admin.faqs.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.1 9a3 3 0 1 1 4.8 2.4c-1.1.8-1.9 1.3-1.9 2.6M12 18h.01"/>
+                    </svg>
+                    FAQs
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}"
+                   href="{{ route('admin.blog-categories.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M3 5h7l2 2h9v12H3z"/>
+                        <path d="M7 11h10M7 15h7"/>
+                    </svg>
+                    Blog Categories
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}"
+                   href="{{ route('admin.blogs.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M5 3h14v18H5z"/>
+                        <path d="M8 7h8M8 11h8M8 15h5"/>
+                    </svg>
+                    Blog Posts
+                </a>
             </nav>
         </aside>
 

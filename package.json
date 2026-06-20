@@ -23,6 +23,7 @@
     "dependencies": {
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.3",
+        "dompurify": "^3.4.11",
         "vue-router": "^5.1.0"
     }
 }
