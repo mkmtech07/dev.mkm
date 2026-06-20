@@ -162,7 +162,7 @@
                             <label class="form-label" for="logo">Logo</label>
                             @if ($settings->logo)
                                 <div class="mb-3">
-                                    <img class="image-preview" src="{{ asset('storage/'.$settings->logo) }}" alt="Current logo">
+                                    <img class="image-preview" src="{{ asset($settings->logo) }}" alt="Current logo">
                                 </div>
                             @endif
                             <input class="form-control @error('logo') is-invalid @enderror"
@@ -178,7 +178,7 @@
                             <label class="form-label" for="favicon">Favicon</label>
                             @if ($settings->favicon)
                                 <div class="mb-3">
-                                    <img class="image-preview" src="{{ asset('storage/'.$settings->favicon) }}" alt="Current favicon">
+                                    <img class="image-preview" src="{{ asset($settings->favicon) }}" alt="Current favicon">
                                 </div>
                             @endif
                             <input class="form-control @error('favicon') is-invalid @enderror"

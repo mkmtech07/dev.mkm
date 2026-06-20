@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateWebsiteSettingRequest;
 use App\Models\WebsiteSetting;
+use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class WebsiteSettingController extends Controller
@@ -29,7 +29,7 @@ class WebsiteSettingController extends Controller
                 continue;
             }
 
-            $data[$field] = $request->file($field)->store('website-settings', 'public');
+            $data[$field] = PublicImage::store($request->file($field), 'settings');
 
             if ($settings->{$field}) {
                 $oldImages[] = $settings->{$field};
@@ -38,8 +38,8 @@ class WebsiteSettingController extends Controller
 
         $settings->update($data);
 
-        if ($oldImages !== []) {
-            Storage::disk('public')->delete($oldImages);
+        foreach ($oldImages as $oldImage) {
+            PublicImage::delete($oldImage);
         }
 
         return to_route('admin.settings.edit')

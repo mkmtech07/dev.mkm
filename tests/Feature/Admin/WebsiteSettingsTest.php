@@ -6,7 +6,8 @@ use App\Models\User;
 use App\Models\WebsiteSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class WebsiteSettingsTest extends TestCase
@@ -39,7 +40,7 @@ class WebsiteSettingsTest extends TestCase
 
     public function test_authenticated_users_can_update_settings_and_upload_images(): void
     {
-        Storage::fake('public');
+        $this->useTemporaryPublicPath();
 
         $user = User::factory()->create();
         $png = base64_decode(
@@ -72,8 +73,22 @@ class WebsiteSettingsTest extends TestCase
 
         $this->assertSame('Example Business', $settings->site_name);
         $this->assertSame('hello@example.com', $settings->email);
-        Storage::disk('public')->assertExists($settings->logo);
-        Storage::disk('public')->assertExists($settings->favicon);
+        $this->assertFileExists(public_path($settings->logo));
+        $this->assertFileExists(public_path($settings->favicon));
+
+        $oldLogo = $settings->logo;
+
+        $this->actingAs($user)
+            ->put(route('admin.settings.update'), [
+                'site_name' => 'Example Business',
+                'logo' => UploadedFile::fake()->createWithContent('new-logo.png', $png),
+            ])
+            ->assertRedirect(route('admin.settings.edit'));
+
+        $settings->refresh();
+
+        $this->assertFileDoesNotExist(public_path($oldLogo));
+        $this->assertFileExists(public_path($settings->logo));
     }
 
     public function test_settings_update_is_validated(): void
@@ -89,5 +104,14 @@ class WebsiteSettingsTest extends TestCase
             ])
             ->assertRedirect(route('admin.settings.edit'))
             ->assertSessionHasErrors(['site_name', 'email', 'facebook_url']);
+    }
+
+    private function useTemporaryPublicPath(): void
+    {
+        $publicPath = storage_path('framework/testing/public/'.Str::uuid());
+
+        File::ensureDirectoryExists($publicPath);
+        $this->app->usePublicPath($publicPath);
+        $this->beforeApplicationDestroyed(fn () => File::deleteDirectory($publicPath));
     }
 }

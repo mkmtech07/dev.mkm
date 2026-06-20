@@ -43,6 +43,25 @@
                     </svg>
                     Website Settings
                 </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.hero-sliders.*') ? 'active' : '' }}"
+                   href="{{ route('admin.hero-sliders.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                        <circle cx="8.5" cy="9" r="1.5"/>
+                        <path d="m3 16 5-4 4 3 3-2 6 4"/>
+                    </svg>
+                    Hero Sliders
+                </a>
+
+                <a class="nav-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}"
+                   href="{{ route('admin.services.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h10"/>
+                        <circle cx="18" cy="17" r="2"/>
+                    </svg>
+                    Services
+                </a>
             </nav>
         </aside>
 
