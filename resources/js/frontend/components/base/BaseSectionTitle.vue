@@ -12,6 +12,11 @@ defineProps({
         type: String,
         default: '',
     },
+    headingTag: {
+        type: String,
+        default: 'h2',
+        validator: (value) => ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(value),
+    },
 });
 </script>
 
@@ -20,7 +25,7 @@ defineProps({
         <p v-if="eyebrow" class="text-primary text-uppercase fw-semibold mb-2">
             {{ eyebrow }}
         </p>
-        <h2 class="display-6 fw-bold mb-3">{{ title }}</h2>
+        <component :is="headingTag" class="display-6 fw-bold mb-3">{{ title }}</component>
         <p v-if="description" class="lead text-body-secondary mb-0">
             {{ description }}
         </p>

@@ -38,6 +38,29 @@ class WebsiteSettingsTest extends TestCase
         ]);
     }
 
+    public function test_saved_branding_is_rendered_in_the_admin_and_frontend_shells(): void
+    {
+        $user = User::factory()->create();
+        $logoPath = 'assets/images/settings/example-logo.png';
+
+        WebsiteSetting::create([
+            'site_name' => 'Example Business',
+            'logo' => $logoPath,
+            'favicon' => 'assets/images/settings/example-icon.png',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Example Business')
+            ->assertSee(asset($logoPath), false);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Example Business')
+            ->assertSee('example-logo.png');
+    }
+
     public function test_authenticated_users_can_update_settings_and_upload_images(): void
     {
         $this->useTemporaryPublicPath();

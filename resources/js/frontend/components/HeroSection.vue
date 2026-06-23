@@ -2,9 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import BaseButton from './base/BaseButton.vue';
+import { siteSettings } from '../siteSettings';
 
 const props = defineProps({
-    eyebrow: { type: String, default: 'Welcome to Billsoft' },
+    eyebrow: { type: String, default: `Welcome to ${siteSettings.siteName}` },
     title: { type: String, required: true },
     description: { type: String, required: true },
     buttonText: { type: String, default: 'Explore our services' },
@@ -41,7 +42,7 @@ const heroStyle = computed(() => {
     }
 
     return {
-        backgroundImage: `linear-gradient(100deg, rgba(13, 27, 42, 0.94) 0%, rgba(13, 27, 42, 0.68) 55%, rgba(13, 110, 253, 0.35) 100%), url("${currentSlide.value.image_url}")`,
+        backgroundImage: `linear-gradient(100deg, rgba(13, 27, 42, 0.94) 0%, rgba(13, 27, 42, 0.68) 55%, rgba(var(--bs-primary-rgb), 0.35) 100%), url("${currentSlide.value.image_url}")`,
     };
 });
 
@@ -201,7 +202,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     background-color: #0d1b2a;
-    background-image: linear-gradient(120deg, #0d1b2a, #0d6efd);
+    background-image: linear-gradient(120deg, #0d1b2a, var(--site-primary-color));
     background-position: center;
     background-size: cover;
 }

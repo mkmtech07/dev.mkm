@@ -15,7 +15,7 @@
                             <p class="text-secondary mb-4">
                                 Manage your business website content and contact details from one place.
                             </p>
-                            <a class="btn btn-primary" href="{{ route('admin.settings.edit') }}">
+                            <a class="btn btn-primary" href="{{ route('admin.website.settings.edit') }}">
                                 Configure website settings
                             </a>
                         </div>

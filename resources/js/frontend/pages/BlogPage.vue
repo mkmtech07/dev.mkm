@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import BlogCard from '../components/BlogCard.vue';
 import BaseEmptyState from '../components/base/BaseEmptyState.vue';
 import BaseLoader from '../components/base/BaseLoader.vue';
+import { siteSettings } from '../siteSettings';
 
 const route = useRoute();
 const router = useRouter();
@@ -104,7 +105,7 @@ onBeforeUnmount(() => requestController?.abort());
         <section class="blog-hero py-5 text-white">
             <div class="container py-lg-4 text-center">
                 <p class="text-uppercase fw-semibold opacity-75 mb-2">Insights &amp; Ideas</p>
-                <h1 class="display-4 fw-bold mb-3">The Billsoft Blog</h1>
+                <h1 class="display-4 fw-bold mb-3">The {{ siteSettings.siteName }} Blog</h1>
                 <p class="lead mx-auto mb-0 blog-intro">Practical ideas for simpler operations and smarter business growth.</p>
             </div>
         </section>
@@ -207,7 +208,7 @@ onBeforeUnmount(() => requestController?.abort());
 
 <style scoped>
 .blog-hero {
-    background: linear-gradient(135deg, #0d6efd 0%, #084298 100%);
+    background: linear-gradient(135deg, var(--site-primary-color) 0%, #0d1b2a 100%);
 }
 
 .blog-intro {

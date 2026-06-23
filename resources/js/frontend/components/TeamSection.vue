@@ -153,7 +153,7 @@ onBeforeUnmount(() => requestController?.abort());
 }
 
 .team-placeholder {
-    background: linear-gradient(135deg, #0d1b2a, #0d6efd);
+    background: linear-gradient(135deg, #0d1b2a, var(--site-primary-color));
     color: rgba(255, 255, 255, 0.92);
     font-size: 3rem;
     font-weight: 700;

@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import BlogCard from '../components/BlogCard.vue';
 import BaseLoader from '../components/base/BaseLoader.vue';
+import { applySeo, loadRouteSeo, siteSettings } from '../siteSettings';
 
 const route = useRoute();
 const blog = ref(null);
@@ -11,12 +12,9 @@ const relatedBlogs = ref([]);
 const loading = ref(true);
 const notFound = ref(false);
 const errorMessage = ref('');
-const appName = import.meta.env.VITE_APP_NAME || 'Billsoft';
+const appName = siteSettings.siteName;
 let requestController;
 
-const originalDescription = document.querySelector('meta[name="description"]');
-const originalDescriptionContent = originalDescription?.getAttribute('content') ?? null;
-const dynamicElements = [];
 
 const safeContent = computed(() => DOMPurify.sanitize(blog.value?.content || '', {
     USE_PROFILES: { html: true },
@@ -32,39 +30,8 @@ const publishedDate = computed(() => {
     }).format(new Date(blog.value.published_at));
 });
 
-const ensureMeta = (selector, attributes) => {
-    let element = document.querySelector(selector);
-
-    if (! element) {
-        element = document.createElement('meta');
-        Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
-        document.head.appendChild(element);
-        dynamicElements.push(element);
-    }
-
-    return element;
-};
-
 const updateMetadata = (post) => {
-    const title = post.meta_title || post.title;
-    const description = post.meta_description || post.excerpt || '';
-    document.title = `${title} | ${appName}`;
-
-    ensureMeta('meta[name="description"]', { name: 'description' }).setAttribute('content', description);
-    ensureMeta('meta[property="og:title"]', { property: 'og:title' }).setAttribute('content', title);
-    ensureMeta('meta[property="og:description"]', { property: 'og:description' }).setAttribute('content', description);
-
-    ensureMeta('meta[property="og:image"]', { property: 'og:image' })
-        .setAttribute('content', post.og_image || post.featured_image || '');
-
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (! canonical) {
-        canonical = document.createElement('link');
-        canonical.setAttribute('rel', 'canonical');
-        document.head.appendChild(canonical);
-        dynamicElements.push(canonical);
-    }
-    canonical.setAttribute('href', post.canonical_url || window.location.href);
+    loadRouteSeo(route.fullPath);
 };
 
 const loadBlog = async (slug) => {
@@ -85,7 +52,7 @@ const loadBlog = async (slug) => {
 
         if (response.status === 404) {
             notFound.value = true;
-            document.title = `Blog Post Not Found | ${appName}`;
+            applySeo({ title: `Blog Post Not Found | ${appName}` });
             return;
         }
 
@@ -112,11 +79,6 @@ watch(() => route.params.slug, (slug) => loadBlog(String(slug)), { immediate: tr
 
 onBeforeUnmount(() => {
     requestController?.abort();
-    dynamicElements.forEach((element) => element.remove());
-
-    if (originalDescription) {
-        originalDescription.setAttribute('content', originalDescriptionContent || '');
-    }
 });
 </script>
 

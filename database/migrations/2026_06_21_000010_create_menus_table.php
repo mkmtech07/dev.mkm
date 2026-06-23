@@ -11,9 +11,10 @@ return new class extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('location');
+            $table->enum('location', ['header', 'footer', 'sidebar']);
             $table->boolean('status')->default(true);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['location', 'status']);
         });

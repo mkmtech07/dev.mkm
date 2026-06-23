@@ -54,8 +54,8 @@ onBeforeUnmount(() => {
                             :aria-expanded="index === 0 ? 'true' : 'false'"
                             :aria-controls="`faq-collapse-${faq.id}`"
                         >
-                            <span>{{ faq.question }}</span>
-                            <span v-if="faq.category" class="badge rounded-pill text-bg-light ms-auto me-3">
+                            <span class="faq-question">{{ faq.question }}</span>
+                            <span v-if="faq.category" class="faq-category badge rounded-pill text-bg-light">
                                 {{ faq.category }}
                             </span>
                         </button>
@@ -81,7 +81,28 @@ onBeforeUnmount(() => {
 }
 
 .accordion-button {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7rem auto;
+    gap: 1rem;
     padding: 1.35rem 1.5rem;
+}
+
+.accordion-button::after {
+    margin-left: 0;
+}
+
+.faq-question {
+    min-width: 0;
+    text-align: left;
+}
+
+.faq-category {
+    width: 7rem;
+    justify-self: end;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .accordion-button:not(.collapsed) {
@@ -98,5 +119,26 @@ onBeforeUnmount(() => {
     padding: 1.25rem 1.5rem 1.5rem;
     line-height: 1.75;
     white-space: pre-line;
+}
+
+@media (max-width: 575.98px) {
+    .accordion-button {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.45rem 0.75rem;
+        padding: 1.1rem;
+    }
+
+    .faq-category {
+        grid-column: 1;
+        grid-row: 2;
+        width: fit-content;
+        max-width: 100%;
+        justify-self: start;
+    }
+
+    .accordion-button::after {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+    }
 }
 </style>

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import TestimonialCard from './TestimonialCard.vue';
+import { siteSettings } from '../siteSettings';
 
 const demoTestimonials = [
     {
@@ -8,7 +9,7 @@ const demoTestimonials = [
         client_name: 'Aarav Mehta',
         company: 'Mehta Retail',
         designation: 'Owner',
-        review: 'Billsoft made our daily billing process faster and much easier to manage.',
+        review: `${siteSettings.siteName} made our daily billing process faster and much easier to manage.`,
         rating: 5,
         image_url: null,
         featured: true,
@@ -183,7 +184,7 @@ onBeforeUnmount(() => {
     width: 3rem;
     height: 3rem;
     place-items: center;
-    color: #0d6efd;
+    color: var(--site-primary-color);
     font-size: 2rem;
     line-height: 1;
     transform: translateY(-50%);
@@ -205,7 +206,7 @@ onBeforeUnmount(() => {
 }
 
 .slider-indicator.active {
-    background: #0d6efd;
+    background: var(--site-primary-color);
 }
 
 .testimonial-fade-enter-active,

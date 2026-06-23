@@ -16,6 +16,10 @@ defineProps({
         type: String,
         default: '',
     },
+    headingTag: {
+        type: String,
+        default: 'h2',
+    },
 });
 
 const fallbackServices = [
@@ -91,6 +95,7 @@ onBeforeUnmount(() => requestController?.abort());
                 :eyebrow="eyebrow"
                 :title="title"
                 :description="description"
+                :heading-tag="headingTag"
             />
 
             <div class="row g-4 justify-content-center">
@@ -111,7 +116,7 @@ onBeforeUnmount(() => requestController?.abort());
     max-width: 42rem;
 }
 
-.services-title :deep(h2) {
+.services-title :deep(.display-6) {
     margin-bottom: 0.5rem !important;
 }
 </style>

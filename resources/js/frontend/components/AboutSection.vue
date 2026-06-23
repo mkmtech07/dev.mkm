@@ -128,7 +128,7 @@ onBeforeUnmount(() => requestController?.abort());
 .about-image-placeholder {
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, #0d1b2a, #0d6efd);
+    background: linear-gradient(135deg, #0d1b2a, var(--site-primary-color));
     color: rgba(255, 255, 255, 0.9);
 }
 

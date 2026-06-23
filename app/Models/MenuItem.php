@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MenuItem extends Model
 {
-    public const TYPES = ['page', 'custom_url', 'blog_category'];
+    use SoftDeletes;
+
+    public const TYPES = ['page', 'blog', 'blog_category', 'custom_url'];
 
     public const TARGETS = ['_self', '_blank'];
 
@@ -19,6 +22,8 @@ class MenuItem extends Model
         'title',
         'type',
         'page_id',
+        'blog_id',
+        'blog_category_id',
         'url',
         'icon',
         'target',
@@ -52,6 +57,16 @@ class MenuItem extends Model
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class);
+    }
+
+    public function blog(): BelongsTo
+    {
+        return $this->belongsTo(Blog::class);
+    }
+
+    public function blogCategory(): BelongsTo
+    {
+        return $this->belongsTo(BlogCategory::class);
     }
 
     public function scopeActive(Builder $query): Builder

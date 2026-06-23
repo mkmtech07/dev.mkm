@@ -3,37 +3,27 @@ import DOMPurify from 'dompurify';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import BaseLoader from '../components/base/BaseLoader.vue';
+import { applySeo, loadRouteSeo, siteSettings } from '../siteSettings';
 
 const route = useRoute();
 const page = ref(null);
 const loading = ref(true);
 const notFound = ref(false);
 const errorMessage = ref('');
-const appName = import.meta.env.VITE_APP_NAME || 'Billsoft';
+const appName = siteSettings.siteName;
 
-const originalDescription = document.querySelector('meta[name="description"]');
-const originalDescriptionContent = originalDescription?.getAttribute('content') ?? null;
 let requestController;
-let dynamicDescription;
 
 const safeContent = computed(() => DOMPurify.sanitize(page.value?.content || '', {
     USE_PROFILES: { html: true },
 }));
 
 const updateMetadata = (title, description = '') => {
-    document.title = `${title} | ${appName}`;
-
-    let descriptionTag = document.querySelector('meta[name="description"]');
-
-    if (! descriptionTag) {
-        descriptionTag = document.createElement('meta');
-        descriptionTag.setAttribute('name', 'description');
-        descriptionTag.dataset.dynamicPageMeta = 'true';
-        document.head.appendChild(descriptionTag);
-        dynamicDescription = descriptionTag;
+    if (page.value) {
+        loadRouteSeo(route.fullPath);
+    } else {
+        applySeo({ title: `${title} | ${appName}`, description });
     }
-
-    descriptionTag.setAttribute('content', description || '');
 };
 
 const loadPage = async (slug) => {
@@ -88,12 +78,6 @@ watch(
 
 onBeforeUnmount(() => {
     requestController?.abort();
-
-    if (originalDescription) {
-        originalDescription.setAttribute('content', originalDescriptionContent || '');
-    } else {
-        dynamicDescription?.remove();
-    }
 });
 </script>
 

@@ -75,8 +75,8 @@ const initial = computed(() => displayName.value.trim().charAt(0).toUpperCase() 
 }
 
 .client-placeholder {
-    background: #e7f1ff;
-    color: #0d6efd;
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--site-primary-color);
     font-size: 1.75rem;
     font-weight: 700;
 }

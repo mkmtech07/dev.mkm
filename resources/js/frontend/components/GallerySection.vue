@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
 }
 
 .gallery-card:focus-visible {
-    outline: 0.2rem solid rgba(13, 110, 253, 0.35);
+    outline: 0.2rem solid rgba(var(--bs-primary-rgb), 0.35);
     outline-offset: 0.2rem;
 }
 

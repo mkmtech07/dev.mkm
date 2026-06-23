@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\BlogCategory;
 use App\Models\Menu;
 use App\Models\MenuItem;
 use Illuminate\Support\Collection;
@@ -46,27 +45,18 @@ class MenuCacheService
 
         $items = $menu->items()
             ->active()
-            ->with('page:id,title,slug,status')
+            ->with([
+                'page:id,title,slug,status',
+                'blog:id,title,slug,status,publish_at',
+                'blogCategory:id,name,slug,status',
+            ])
             ->ordered()
             ->get();
 
-        $categorySlugs = $items
-            ->where('type', 'blog_category')
-            ->pluck('url')
-            ->filter()
-            ->unique();
-
-        $categories = BlogCategory::query()
-            ->active()
-            ->whereIn('slug', $categorySlugs)
-            ->get(['name', 'slug'])
-            ->keyBy('slug');
-
         $children = $items->whereNotNull('parent_id')->groupBy('parent_id');
-
         $tree = $items
             ->whereNull('parent_id')
-            ->map(fn (MenuItem $item) => $this->transform($item, $children->get($item->id, collect()), $categories))
+            ->map(fn (MenuItem $item) => $this->transform($item, $children))
             ->filter()
             ->values()
             ->all();
@@ -79,14 +69,26 @@ class MenuCacheService
         ];
     }
 
-    private function transform(MenuItem $item, Collection $children, Collection $categories): ?array
+    /**
+     * @param  Collection<int, Collection<int, MenuItem>>  $children
+     * @param  array<int, true>  $visited
+     */
+    private function transform(MenuItem $item, Collection $children, array $visited = []): ?array
     {
+        if (isset($visited[$item->id])) {
+            return null;
+        }
+
+        $visited[$item->id] = true;
         $url = match ($item->type) {
             'page' => $item->page?->status ? '/'.$item->page->slug : null,
-            'blog_category' => $categories->has($item->url)
-                ? '/blog?category='.rawurlencode($item->url)
+            'blog' => $item->blog?->status && ! $item->blog->publish_at?->isFuture()
+                ? '/blog/'.$item->blog->slug
                 : null,
-            'custom_url' => $item->url,
+            'blog_category' => $item->blogCategory?->status
+                ? '/blog?category='.rawurlencode($item->blogCategory->slug)
+                : null,
+            'custom_url' => $this->safeCustomUrl($item->url),
             default => null,
         };
 
@@ -97,11 +99,13 @@ class MenuCacheService
         return [
             'id' => $item->id,
             'title' => $item->title,
+            'type' => $item->type,
             'url' => $url,
             'icon' => $item->icon,
             'target' => $item->target,
             'children' => $children
-                ->map(fn (MenuItem $child) => $this->transform($child, collect(), $categories))
+                ->get($item->id, collect())
+                ->map(fn (MenuItem $child) => $this->transform($child, $children, $visited))
                 ->filter()
                 ->values()
                 ->all(),
@@ -111,5 +115,12 @@ class MenuCacheService
     private function key(string $location): string
     {
         return "frontend.menu.{$location}";
+    }
+
+    private function safeCustomUrl(?string $url): ?string
+    {
+        return $url && preg_match('~^(?:/(?!/)|https?://|mailto:|tel:|#)~i', $url)
+            ? $url
+            : null;
     }
 }

@@ -7,6 +7,7 @@ import BlogPage from '../pages/BlogPage.vue';
 import BlogDetails from '../pages/BlogDetails.vue';
 import ContactPage from '../pages/ContactPage.vue';
 import DynamicPage from '../pages/DynamicPage.vue';
+import { loadRouteSeo } from '../siteSettings';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -25,16 +26,6 @@ const router = createRouter({
     },
 });
 
-router.afterEach((to) => {
-    if (['dynamic-page', 'blog-details'].includes(to.name)) {
-        return;
-    }
-
-    const pageName = to.name
-        ? `${String(to.name).charAt(0).toUpperCase()}${String(to.name).slice(1)}`
-        : 'Home';
-
-    document.title = `${pageName} | ${import.meta.env.VITE_APP_NAME || 'Billsoft'}`;
-});
+router.afterEach((to) => loadRouteSeo(to.fullPath));
 
 export default router;
