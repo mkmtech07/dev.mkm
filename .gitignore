@@ -23,3 +23,9 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 *.zip
+
+# Ignore all uploaded public images/assets
+/public/assets/images/**
+!/public/assets/images/**/
+!/public/assets/images/**/.gitkeep
+
