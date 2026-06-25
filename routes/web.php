@@ -2,18 +2,24 @@
 
 use App\Http\Controllers\Admin\AboutSectionController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\Api\AdminNotificationApiController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\EmailAutomationSettingController;
+use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\HeroSliderController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\LeadNoteController;
+use App\Http\Controllers\Admin\MailLogController;
+use App\Http\Controllers\Admin\MailSettingController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\NewsletterSubscriberController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
@@ -27,6 +33,7 @@ use App\Http\Controllers\Admin\Website\FooterSettingController;
 use App\Http\Controllers\Admin\Website\FooterSocialLinkController;
 use App\Http\Controllers\Admin\Website\HomepageSectionController;
 use App\Http\Controllers\Admin\Website\MediaLibraryController;
+use App\Http\Controllers\Admin\Website\MaintenanceSettingController;
 use App\Http\Controllers\Admin\Website\SchemaMarkupController;
 use App\Http\Controllers\Admin\Website\SeoPageController;
 use App\Http\Controllers\Admin\Website\SeoSettingController;
@@ -36,6 +43,7 @@ use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\ContactMessageController as FrontendContactMessageController;
 use App\Http\Controllers\Frontend\FooterController as FrontendFooterController;
 use App\Http\Controllers\Frontend\HomepageSectionController as FrontendHomepageSectionController;
+use App\Http\Controllers\Frontend\MaintenanceStatusController as FrontendMaintenanceStatusController;
 use App\Http\Controllers\Frontend\MenuController as FrontendMenuController;
 use App\Http\Controllers\Frontend\ThemeSettingController as FrontendThemeSettingController;
 use App\Http\Controllers\Frontend\WebsiteSettingController as FrontendWebsiteSettingController;
@@ -55,6 +63,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/sitemap.xml', [PublicSeoController::class, 'sitemap'])->name('seo.sitemap');
 Route::get('/robots.txt', [PublicSeoController::class, 'robots'])->name('seo.robots');
+Route::get('/api/maintenance-status', [FrontendMaintenanceStatusController::class, 'show'])
+    ->name('frontend.maintenance-status.show');
 Route::get('/api/seo', [PublicSeoController::class, 'show'])->name('seo.show');
 Route::get('/api/seo/schema', [PublicSeoController::class, 'schema'])->name('seo.schema');
 Route::post('/api/leads', [PublicLeadController::class, 'store'])
@@ -259,6 +269,53 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::redirect('/', '/admin/dashboard')->name('index');
         Route::view('/dashboard', 'admin.dashboard')->middleware('permission:dashboard.view')->name('dashboard');
+        Route::prefix('api/notifications')->name('api.notifications.')->group(function () {
+            Route::get('/', [AdminNotificationApiController::class, 'index'])
+                ->middleware('permission:notifications.view')->name('index');
+            Route::get('/unread-count', [AdminNotificationApiController::class, 'unreadCount'])
+                ->middleware('permission:notifications.view')->name('unread-count');
+            Route::post('/mark-all-as-read', [AdminNotificationApiController::class, 'markAllRead'])
+                ->middleware('permission:notifications.mark_read')->name('mark-all-read');
+            Route::post('/{notification}/mark-as-read', [AdminNotificationApiController::class, 'markRead'])
+                ->middleware('permission:notifications.mark_read')->name('mark-read');
+            Route::delete('/{notification}', [AdminNotificationApiController::class, 'destroy'])
+                ->middleware('permission:notifications.delete')->name('destroy');
+        });
+        Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllRead'])
+            ->middleware('permission:notifications.mark_read')->name('notifications.mark-all-read');
+        Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markRead'])
+            ->middleware('permission:notifications.mark_read')->name('notifications.mark-read');
+        Route::delete('/notifications/bulk-delete', [NotificationController::class, 'bulkDestroy'])
+            ->middleware('permission:notifications.delete')->name('notifications.bulk-destroy');
+        Route::resource('/notifications', NotificationController::class)
+            ->only(['index', 'show', 'destroy'])
+            ->middlewareFor(['index', 'show'], 'permission:notifications.view')
+            ->middlewareFor('destroy', 'permission:notifications.delete');
+        Route::get('/email-templates/{emailTemplate}/preview', [EmailTemplateController::class, 'preview'])
+            ->middleware('permission:email_templates.preview')->name('email-templates.preview');
+        Route::patch('/email-templates/{emailTemplate}/toggle-status', [EmailTemplateController::class, 'toggleStatus'])
+            ->middleware('permission:email_templates.edit')->name('email-templates.toggle-status');
+        Route::resource('/email-templates', EmailTemplateController::class)
+            ->parameters(['email-templates' => 'emailTemplate'])
+            ->middlewareFor(['index', 'show'], 'permission:email_templates.view')
+            ->middlewareFor(['create', 'store'], 'permission:email_templates.create')
+            ->middlewareFor(['edit', 'update'], 'permission:email_templates.edit')
+            ->middlewareFor('destroy', 'permission:email_templates.delete');
+        Route::get('/email-automation', [EmailAutomationSettingController::class, 'edit'])
+            ->middleware('permission:email_automation.view')->name('email-automation.edit');
+        Route::put('/email-automation', [EmailAutomationSettingController::class, 'update'])
+            ->middleware('permission:email_automation.edit')->name('email-automation.update');
+        Route::get('/mail-settings', [MailSettingController::class, 'edit'])
+            ->middleware('permission:mail_settings.view')->name('mail-settings.edit');
+        Route::put('/mail-settings', [MailSettingController::class, 'update'])
+            ->middleware('permission:mail_settings.edit')->name('mail-settings.update');
+        Route::post('/mail-settings/test', [MailSettingController::class, 'test'])
+            ->middleware('permission:mail_settings.test')->name('mail-settings.test');
+        Route::resource('/mail-logs', MailLogController::class)
+            ->parameters(['mail-logs' => 'mailLog'])
+            ->only(['index', 'show', 'destroy'])
+            ->middlewareFor(['index', 'show'], 'permission:mail_logs.view')
+            ->middlewareFor('destroy', 'permission:mail_logs.delete');
         Route::get('/settings', [WebsiteSettingController::class, 'edit'])
             ->middleware('permission:website_settings.view')->name('settings.edit');
         Route::put('/settings', [WebsiteSettingController::class, 'update'])
@@ -273,6 +330,10 @@ Route::middleware('auth')->group(function () {
             ->middleware('permission:theme_settings.edit')->name('website.theme-settings.update');
         Route::post('/website/theme-settings/reset', [ThemeSettingController::class, 'reset'])
             ->middleware('permission:theme_settings.edit')->name('website.theme-settings.reset');
+        Route::get('/website/maintenance', [MaintenanceSettingController::class, 'edit'])
+            ->middleware('permission:maintenance.view')->name('website.maintenance.edit');
+        Route::put('/website/maintenance', [MaintenanceSettingController::class, 'update'])
+            ->middleware('permission:maintenance.edit')->name('website.maintenance.update');
         Route::patch('/website/homepage-sections/{homepageSection}/toggle-status', [HomepageSectionController::class, 'toggleStatus'])
             ->middleware('permission:homepage_sections.edit')
             ->name('website.homepage-sections.toggle-status');

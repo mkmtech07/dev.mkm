@@ -4,12 +4,17 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap';
 import FrontendLayout from './layouts/FrontendLayout.vue';
 import router from './router';
+import { loadMaintenanceStatus, maintenanceStatus } from './maintenance';
 import { loadSchemaMarkup, loadTrackingIntegrations, loadWebsiteSettings } from './siteSettings';
 
 const start = async () => {
     await loadWebsiteSettings();
-    loadTrackingIntegrations();
-    loadSchemaMarkup();
+    await loadMaintenanceStatus();
+
+    if (! maintenanceStatus.enabled) {
+        loadTrackingIntegrations();
+        loadSchemaMarkup();
+    }
 
     createApp(FrontendLayout)
         .use(router)

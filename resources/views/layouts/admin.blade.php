@@ -48,6 +48,63 @@
                 </a>
                 @endif
 
+                @if($adminUser->hasPermission('notifications.view'))
+                <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}"
+                   href="{{ route('admin.notifications.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                        <path d="M10 21h4"/>
+                    </svg>
+                    Notifications
+                </a>
+                @endif
+
+                @if($adminUser->hasPermission('email_templates.view'))
+                <a class="nav-link {{ request()->routeIs('admin.email-templates.*') ? 'active' : '' }}"
+                   href="{{ route('admin.email-templates.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="m4 7 8 6 8-6M8 16h8"/>
+                    </svg>
+                    Email Templates
+                </a>
+                @endif
+
+                @if($adminUser->hasPermission('mail_settings.view'))
+                <a class="nav-link {{ request()->routeIs('admin.mail-settings.*') ? 'active' : '' }}"
+                   href="{{ route('admin.mail-settings.edit') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 5h16v14H4z"/>
+                        <path d="m4 7 8 6 8-6"/>
+                        <path d="M8 17h8"/>
+                    </svg>
+                    Mail Settings
+                </a>
+                @endif
+
+                @if($adminUser->hasPermission('email_automation.view'))
+                <a class="nav-link {{ request()->routeIs('admin.email-automation.*') ? 'active' : '' }}"
+                   href="{{ route('admin.email-automation.edit') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 5h16v14H4z"/>
+                        <path d="m4 7 8 6 8-6"/>
+                        <path d="M8 16h4M15 15l2 2 4-4"/>
+                    </svg>
+                    Email Automation
+                </a>
+                @endif
+
+                @if($adminUser->hasPermission('mail_logs.view'))
+                <a class="nav-link {{ request()->routeIs('admin.mail-logs.*') ? 'active' : '' }}"
+                   href="{{ route('admin.mail-logs.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M6 3h9l3 3v15H6z"/>
+                        <path d="M15 3v4h4M9 11h6M9 15h6M9 19h3"/>
+                    </svg>
+                    Mail Logs
+                </a>
+                @endif
+
                 @if($adminUser->hasPermission('theme_settings.view'))
                 <a class="nav-link {{ request()->routeIs('admin.website.theme-settings.*') ? 'active' : '' }}"
                    href="{{ route('admin.website.theme-settings.edit') }}">
@@ -69,6 +126,17 @@
                         <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/>
                     </svg>
                     Website Settings
+                </a>
+                @endif
+
+                @if($adminUser->hasPermission('maintenance.view'))
+                <a class="nav-link {{ request()->routeIs('admin.website.maintenance.*') ? 'active' : '' }}"
+                   href="{{ route('admin.website.maintenance.edit') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 7h16M7 7v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"/>
+                        <path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6"/>
+                    </svg>
+                    Maintenance Mode
                 </a>
                 @endif
 
@@ -357,6 +425,57 @@
                     <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
                 </div>
 
+                <div class="d-flex align-items-center gap-2">
+                @if($adminUser->hasPermission('notifications.view'))
+                <div class="dropdown" data-notification-dropdown
+                     data-index-url="{{ route('admin.api.notifications.index') }}"
+                     data-count-url="{{ route('admin.api.notifications.unread-count') }}"
+                     @if($adminUser->hasPermission('notifications.mark_read')) data-mark-all-url="{{ route('admin.api.notifications.mark-all-read') }}" @endif>
+                    <button class="btn btn-light position-relative"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false"
+                            aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $adminNotificationUnreadCount ? '' : 'd-none' }}"
+                              data-notification-count>{{ $adminNotificationUnreadCount }}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 notification-dropdown-menu p-0">
+                        <div class="d-flex justify-content-between align-items-center gap-2 px-3 py-2 border-bottom">
+                            <div class="fw-semibold">Notifications</div>
+                            @if($adminUser->hasPermission('notifications.mark_read'))
+                                <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}" data-notifications-mark-all>
+                                    @csrf
+                                    <button class="btn btn-sm btn-link text-decoration-none p-0" type="submit">Mark all read</button>
+                                </form>
+                            @endif
+                        </div>
+                        <div data-notification-list>
+                            @forelse($adminHeaderNotifications as $notification)
+                                <a class="dropdown-item notification-dropdown-item {{ $notification->is_read ? '' : 'unread' }}"
+                                   href="{{ $notification->targetUrl() }}"
+                                   data-notification-link
+                                   data-notification-id="{{ $notification->id }}"
+                                   @if($adminUser->hasPermission('notifications.mark_read')) data-mark-url="{{ route('admin.api.notifications.mark-read', $notification) }}" @endif>
+                                    <div class="d-flex justify-content-between gap-2">
+                                        <span class="fw-semibold text-truncate">{{ $notification->title }}</span>
+                                        <span class="badge {{ $notification->typeClass() }}">{{ \App\Models\AdminNotification::label($notification->type) }}</span>
+                                    </div>
+                                    <div class="small text-secondary text-truncate">{{ $notification->message ?: \App\Models\AdminNotification::label($notification->module) }}</div>
+                                    <div class="small text-secondary">{{ $notification->created_at?->diffForHumans() }}</div>
+                                </a>
+                            @empty
+                                <div class="px-3 py-4 text-center text-secondary small" data-notification-empty>No unread notifications.</div>
+                            @endforelse
+                        </div>
+                        <div class="border-top p-2">
+                            <a class="btn btn-sm btn-outline-primary w-100" href="{{ route('admin.notifications.index') }}">View All</a>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <div class="dropdown">
                     <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2"
                             type="button"
@@ -376,6 +495,7 @@
                             </form>
                         </li>
                     </ul>
+                </div>
                 </div>
             </header>
 

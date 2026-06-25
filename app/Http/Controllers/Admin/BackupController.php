@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BackupRequest;
 use App\Models\BackupRecord;
-use App\Services\BackupService;
 use App\Services\ActivityLogger;
+use App\Services\AdminNotificationService;
+use App\Services\BackupService;
+use App\Services\EmailAutomationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +52,9 @@ class BackupController extends Controller
     public function store(
         BackupRequest $request,
         BackupService $backupService,
-        ActivityLogger $activityLogger
+        ActivityLogger $activityLogger,
+        AdminNotificationService $notifications,
+        EmailAutomationService $automation,
     ): RedirectResponse
     {
         $placeholder = 'pending-'.Str::uuid().'.zip';
@@ -79,6 +83,16 @@ class BackupController extends Controller
                 null,
                 ['file_name' => $backup->file_name, 'file_size' => $backup->file_size],
             );
+            $notifications->notifyAllAdmins(
+                'Backup Completed',
+                'Backup file was generated successfully.',
+                'success',
+                'backups',
+                route('admin.backups.show', $backup, false),
+                ['backup_id' => $backup->id, 'status' => 'completed']
+            );
+
+            $automation->sendBackupSuccessAlert($backup->fresh());
 
             return to_route('admin.backups.show', $backup)
                 ->with('success', 'Backup generated successfully.');
@@ -102,6 +116,16 @@ class BackupController extends Controller
                 ['message' => $message],
                 'failed',
             );
+            $notifications->notifyAllAdmins(
+                'Backup Failed',
+                'Backup generation failed. Please check backup details.',
+                'danger',
+                'backups',
+                route('admin.backups.show', $backup, false),
+                ['backup_id' => $backup->id, 'status' => 'failed']
+            );
+
+            $automation->sendBackupFailedAlert($backup->fresh());
 
             return to_route('admin.backups.show', $backup)
                 ->with('error', $message);

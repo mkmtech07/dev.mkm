@@ -55,6 +55,7 @@
                 'searchConsole' => $seoSettings->google_search_console_code,
                 'facebookPixel' => $seoSettings->facebook_pixel_id,
             ]) }};
+            window.__MAINTENANCE_STATUS__ = {{ Illuminate\Support\Js::from($maintenanceStatus ?? null) }};
         </script>
 
         @php

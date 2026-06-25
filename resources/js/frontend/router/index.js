@@ -26,6 +26,10 @@ const router = createRouter({
     },
 });
 
-router.afterEach((to) => loadRouteSeo(to.fullPath));
+router.afterEach((to) => {
+    if (! window.__MAINTENANCE_ACTIVE__) {
+        loadRouteSeo(to.fullPath);
+    }
+});
 
 export default router;

@@ -2,13 +2,19 @@
 
 namespace App\Providers;
 
+use App\Models\AdminNotification;
 use App\Models\ActivityLog;
+use App\Models\EmailAutomationSetting;
+use App\Models\MailLog;
+use App\Models\MailSetting;
+use App\Models\MaintenanceSetting;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\ThemeSetting;
 use App\Models\WebsiteSetting;
 use App\Models\SeoSetting;
 use App\Services\ActivityLogger;
+use App\Services\AdminNotificationService;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -31,7 +37,12 @@ class AppServiceProvider extends ServiceProvider
         $this->registerActivityListeners();
 
         View::composer('layouts.admin', function ($view): void {
-            $view->with('websiteSettings', $this->websiteSettings());
+            $notifications = app(AdminNotificationService::class);
+            $user = Auth::user();
+
+            $view->with('websiteSettings', $this->websiteSettings())
+                ->with('adminNotificationUnreadCount', $notifications->unreadCount($user))
+                ->with('adminHeaderNotifications', $notifications->latestUnread($user, 5));
         });
 
         View::composer('frontend.app', function ($view): void {
@@ -131,7 +142,8 @@ class AppServiceProvider extends ServiceProvider
 
     private function shouldLogAdminWrite(Model $model): bool
     {
-        if ($model instanceof ActivityLog || $model instanceof Role || $model instanceof Permission || $model instanceof ThemeSetting
+        if ($model instanceof ActivityLog || $model instanceof AdminNotification || $model instanceof EmailAutomationSetting || $model instanceof MailLog || $model instanceof MailSetting || $model instanceof Role || $model instanceof Permission || $model instanceof ThemeSetting
+            || $model instanceof MaintenanceSetting
             || ! Auth::check() || ! app()->bound('request')) {
             return false;
         }

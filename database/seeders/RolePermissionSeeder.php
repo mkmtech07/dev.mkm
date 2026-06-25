@@ -26,6 +26,7 @@ class RolePermissionSeeder extends Seeder
         'Footer' => ['footer.view', 'footer.edit'],
         'Website Settings' => ['website_settings.view', 'website_settings.edit'],
         'Theme Settings' => ['theme_settings.view', 'theme_settings.edit'],
+        'Maintenance' => ['maintenance.view', 'maintenance.edit'],
         'Homepage Sections' => ['homepage_sections.view', 'homepage_sections.create', 'homepage_sections.edit', 'homepage_sections.delete'],
         'Hero Sliders' => ['hero_sliders.view', 'hero_sliders.create', 'hero_sliders.edit', 'hero_sliders.delete'],
         'Media Library' => ['media_library.view', 'media_library.create', 'media_library.edit', 'media_library.delete'],
@@ -34,6 +35,11 @@ class RolePermissionSeeder extends Seeder
         'Newsletter' => ['newsletter.view', 'newsletter.create', 'newsletter.edit', 'newsletter.delete'],
         'Contact Messages' => ['contact_messages.view', 'contact_messages.delete'],
         'Backups' => ['backups.view', 'backups.create', 'backups.download', 'backups.delete'],
+        'Notifications' => ['notifications.view', 'notifications.mark_read', 'notifications.delete'],
+        'Email Templates' => ['email_templates.view', 'email_templates.create', 'email_templates.edit', 'email_templates.delete', 'email_templates.preview'],
+        'Email Automation' => ['email_automation.view', 'email_automation.edit'],
+        'Mail Settings' => ['mail_settings.view', 'mail_settings.edit', 'mail_settings.test'],
+        'Mail Logs' => ['mail_logs.view', 'mail_logs.delete'],
         'Activity Logs' => ['activity_logs.view'],
         'Roles' => ['roles.view', 'roles.create', 'roles.edit', 'roles.delete'],
         'Permissions' => ['permissions.view', 'permissions.create', 'permissions.edit', 'permissions.delete'],
@@ -78,10 +84,10 @@ class RolePermissionSeeder extends Seeder
                 'editor' => $permissions->filter(fn (Permission $permission) => in_array($permission->module, [
                     'Dashboard', 'Pages', 'Blog', 'Blog Categories', 'Services', 'About', 'Testimonials',
                     'Team Members', 'Gallery', 'FAQ', 'Menus', 'Footer', 'Homepage Sections',
-                    'Hero Sliders', 'Media Library', 'SEO',
+                    'Hero Sliders', 'Media Library', 'SEO', 'Maintenance', 'Email Templates',
                 ], true)),
                 'manager' => $permissions->filter(fn (Permission $permission) => in_array($permission->module, [
-                    'Dashboard', 'Leads', 'Newsletter', 'Contact Messages', 'Activity Logs',
+                    'Dashboard', 'Leads', 'Newsletter', 'Contact Messages', 'Notifications', 'Activity Logs',
                 ], true)),
                 default => $permissions->filter(fn (Permission $permission) => in_array($permission->slug, [
                     'dashboard.view', 'leads.view', 'leads.create', 'leads.edit', 'contact_messages.view',

@@ -4,27 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PublicNewsletterSubscribeRequest;
 use App\Models\NewsletterSubscriber;
+use App\Services\AdminNotificationService;
+use App\Services\EmailAutomationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PublicNewsletterSubscriberController extends Controller
 {
-    public function subscribe(PublicNewsletterSubscribeRequest $request): JsonResponse
+    public function subscribe(
+        PublicNewsletterSubscribeRequest $request,
+        AdminNotificationService $notifications,
+        EmailAutomationService $automation,
+    ): JsonResponse
     {
         $data = $request->safe()->except('website');
-        $message = DB::transaction(function () use ($data, $request): string {
+        [$message, $subscriber, $shouldNotify] = DB::transaction(function () use ($data, $request): array {
             $subscriber = NewsletterSubscriber::withTrashed()
                 ->where('email', $data['email'])
                 ->lockForUpdate()
                 ->first();
 
             if ($subscriber && ! $subscriber->trashed() && $subscriber->status === 'subscribed') {
-                return 'This email address is already subscribed.';
+                return ['This email address is already subscribed.', $subscriber, false];
             }
 
             if ($subscriber && ! $subscriber->trashed() && $subscriber->status === 'blocked') {
-                return 'This subscription cannot be updated. Please contact us for assistance.';
+                return ['This subscription cannot be updated. Please contact us for assistance.', $subscriber, false];
             }
 
             $attributes = [
@@ -44,11 +50,24 @@ class PublicNewsletterSubscriberController extends Controller
                 $subscriber->restore();
                 $subscriber->update($attributes);
             } else {
-                NewsletterSubscriber::create($attributes);
+                $subscriber = NewsletterSubscriber::create($attributes);
             }
 
-            return 'Thank you for subscribing to our newsletter.';
+            return ['Thank you for subscribing to our newsletter.', $subscriber->fresh(), true];
         });
+
+        if ($shouldNotify && $subscriber) {
+            $notifications->notifyAllAdmins(
+                'New Newsletter Subscriber',
+                "{$subscriber->email} subscribed to newsletter.",
+                'success',
+                'newsletter',
+                route('admin.newsletter-subscribers.show', $subscriber, false),
+                ['newsletter_subscriber_id' => $subscriber->id]
+            );
+
+            $automation->sendNewsletterWelcome($subscriber);
+        }
 
         return response()->json(['message' => $message], 201);
     }

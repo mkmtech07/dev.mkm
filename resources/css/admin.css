@@ -243,6 +243,26 @@ body {
     min-width: 0;
 }
 
+.notification-dropdown-menu {
+    max-width: min(92vw, 24rem);
+    min-width: min(92vw, 22rem);
+}
+
+.notification-dropdown-item {
+    border-bottom: 1px solid #eef0f3;
+    padding: 0.85rem 1rem;
+    white-space: normal;
+}
+
+.notification-dropdown-item.unread {
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.notification-dropdown-item:last-child {
+    border-bottom: 0;
+}
+
 .sidebar-overlay {
     background: rgba(15, 23, 42, 0.5);
     display: none;

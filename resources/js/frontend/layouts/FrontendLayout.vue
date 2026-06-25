@@ -2,18 +2,24 @@
 import Navbar from '../components/Navbar.vue';
 import Footer from '../components/Footer.vue';
 import WhatsAppButton from '../components/WhatsAppButton.vue';
+import MaintenancePage from '../pages/MaintenancePage.vue';
+import { maintenanceStatus } from '../maintenance';
 </script>
 
 <template>
     <div class="frontend-layout d-flex flex-column min-vh-100">
-        <Navbar />
+        <MaintenancePage v-if="maintenanceStatus.enabled" :status="maintenanceStatus" />
 
-        <main class="flex-grow-1">
-            <RouterView />
-        </main>
+        <template v-else>
+            <Navbar />
 
-        <Footer />
-        <WhatsAppButton />
+            <main class="flex-grow-1">
+                <RouterView />
+            </main>
+
+            <Footer />
+            <WhatsAppButton />
+        </template>
     </div>
 </template>
 
