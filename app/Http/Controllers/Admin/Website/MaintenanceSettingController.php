@@ -8,6 +8,7 @@ use App\Models\MaintenanceSetting;
 use App\Services\ActivityLogger;
 use App\Services\AdminNotificationService;
 use App\Services\EmailAutomationService;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -31,7 +32,7 @@ class MaintenanceSettingController extends Controller
         $settings = MaintenanceSetting::firstOrCreateSetting();
         $oldValues = $settings->getAttributes();
         $oldStatus = (bool) $settings->status;
-        $data = $request->safe()->except('image');
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
 
         $data['retry_after_minutes'] = $data['retry_after_minutes'] ?? 60;
         $data['updated_by'] = $request->user()?->getKey();
@@ -39,6 +40,14 @@ class MaintenanceSettingController extends Controller
         $oldImage = null;
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'maintenance');
+            $oldImage = $settings->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            if ($settings->image && $settings->image !== $selectedPath) {
+                $oldImage = $settings->image;
+            }
+        } elseif (MediaPicker::shouldClear($request, 'image')) {
+            $data['image'] = null;
             $oldImage = $settings->image;
         }
 

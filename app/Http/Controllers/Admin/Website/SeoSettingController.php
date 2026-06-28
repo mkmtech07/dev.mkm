@@ -7,7 +7,6 @@ use App\Http\Requests\SeoSettingRequest;
 use App\Models\SeoSetting;
 use App\Services\SeoManager;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class SeoSettingController extends Controller
@@ -19,12 +18,12 @@ class SeoSettingController extends Controller
         ]);
     }
 
-    public function update(SeoSettingRequest $request): RedirectResponse
+    public function update(SeoSettingRequest $request, SeoManager $seoManager): RedirectResponse
     {
         $seoSetting = SeoSetting::query()->oldest('id')->first()
             ?? SeoSetting::create(SeoSetting::defaults());
         $seoSetting->update($request->validated());
-        Cache::forget(SeoManager::SITEMAP_CACHE_KEY);
+        $seoManager->forgetSitemapCache();
 
         return to_route('admin.website.seo.settings.edit')->with('success', 'SEO settings updated successfully.');
     }

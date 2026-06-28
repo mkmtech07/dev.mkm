@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MediaPicker;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -39,6 +40,7 @@ class WebsiteSettingRequest extends FormRequest
             'white_logo' => $image,
             'favicon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,ico,webp,svg', 'max:1024'],
             'og_image' => ['nullable', File::image()->max(2048), 'mimes:jpg,jpeg,png,webp'],
+            ...MediaPicker::validationRules(['logo', 'white_logo', 'favicon', 'og_image']),
             'primary_color' => ['nullable', 'string', 'max:20', 'regex:/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             'secondary_color' => ['nullable', 'string', 'max:20', 'regex:/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             'phone' => ['nullable', 'string', 'max:50'],

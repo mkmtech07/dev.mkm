@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SchemaMarkup extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const TYPES = ['Organization', 'LocalBusiness', 'Website', 'Breadcrumb', 'FAQ', 'Article', 'Product', 'Custom'];
 
-    protected $fillable = ['name', 'type', 'schema_json', 'status', 'sort_order'];
+    protected $fillable = ['tenant_id', 'name', 'type', 'schema_json', 'status', 'sort_order'];
 
     protected function casts(): array
     {

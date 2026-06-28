@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class HomepageSection extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const TYPES = [
         'hero',
@@ -23,6 +24,7 @@ class HomepageSection extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         'title',
         'subtitle',
         'section_key',

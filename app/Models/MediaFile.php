@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use App\Support\MediaLibraryStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,11 +11,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MediaFile extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const FILE_TYPES = ['image', 'document', 'other'];
 
     protected $fillable = [
+        'tenant_id',
         'title',
         'file_name',
         'original_name',
@@ -32,6 +34,7 @@ class MediaFile extends Model
     protected function casts(): array
     {
         return [
+            'tenant_id' => 'integer',
             'file_size' => 'integer',
             'status' => 'boolean',
         ];

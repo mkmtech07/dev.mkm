@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 
 class ThemeSetting extends Model
 {
+    use BelongsToTenant;
+
     public const COLOR_FIELDS = [
         'primary_color', 'secondary_color', 'accent_color', 'body_bg_color', 'text_color',
         'heading_color', 'link_color', 'link_hover_color', 'button_bg_color', 'button_text_color',
@@ -37,6 +40,7 @@ class ThemeSetting extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         ...self::PUBLIC_FIELDS,
         'status',
     ];

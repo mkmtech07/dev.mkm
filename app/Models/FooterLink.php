@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,12 +10,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FooterLink extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const TARGETS = ['_self', '_blank'];
 
     protected $fillable = [
-        'footer_section_id', 'title', 'url', 'icon', 'target', 'status', 'sort_order',
+        'tenant_id', 'footer_section_id', 'title', 'url', 'icon', 'target', 'status', 'sort_order',
     ];
 
     protected function casts(): array

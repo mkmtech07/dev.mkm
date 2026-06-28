@@ -114,7 +114,9 @@ class MenuCacheService
 
     private function key(string $location): string
     {
-        return "frontend.menu.{$location}";
+        $tenantKey = app(TenantManager::class)->cacheKeySuffix();
+
+        return "frontend.menu.{$tenantKey}.{$location}";
     }
 
     private function safeCustomUrl(?string $url): ?string

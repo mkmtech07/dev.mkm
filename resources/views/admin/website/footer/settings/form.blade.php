@@ -50,6 +50,12 @@
                 <input class="form-control @error('footer_logo') is-invalid @enderror" id="footer_logo" name="footer_logo" type="file" accept=".jpg,.jpeg,.png,.webp">
                 <div class="form-text">JPG, PNG, or WebP. Maximum 2 MB.</div>
                 @error('footer_logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @include('admin.components.media-picker', [
+                    'inputName' => 'footer_logo',
+                    'previewUrl' => $footerSetting->footer_logo ? asset($footerSetting->footer_logo) : null,
+                    'label' => 'Footer logo',
+                    'acceptType' => 'image',
+                ])
                 <input name="remove_footer_logo" type="hidden" value="0">
                 @if ($footerSetting->footer_logo)
                     <div class="form-check mt-3">

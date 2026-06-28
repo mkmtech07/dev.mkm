@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MediaPicker;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -32,6 +33,7 @@ class TestimonialRequest extends FormRequest
             'review' => ['required', 'string', 'max:5000'],
             'rating' => ['required', 'integer', 'between:1,5'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            ...MediaPicker::validationRules(['image']),
             'status' => ['required', 'boolean'],
             'featured' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0'],

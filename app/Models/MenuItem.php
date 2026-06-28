@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,13 +11,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MenuItem extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const TYPES = ['page', 'blog', 'blog_category', 'custom_url'];
 
     public const TARGETS = ['_self', '_blank'];
 
     protected $fillable = [
+        'tenant_id',
         'menu_id',
         'parent_id',
         'title',
@@ -34,6 +36,7 @@ class MenuItem extends Model
     protected function casts(): array
     {
         return [
+            'tenant_id' => 'integer',
             'status' => 'boolean',
             'sort_order' => 'integer',
         ];

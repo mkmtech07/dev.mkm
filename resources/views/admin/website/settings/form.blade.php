@@ -21,6 +21,12 @@
                             <input class="form-control @error($field) is-invalid @enderror" id="{{ $field }}" name="{{ $field }}" type="file" data-image-input data-preview="{{ $field }}-preview" data-empty="{{ $field }}-empty" accept="{{ $field === 'favicon' ? '.jpg,.jpeg,.png,.ico,.webp,.svg' : ($field === 'og_image' ? '.jpg,.jpeg,.png,.webp' : '.jpg,.jpeg,.png,.webp,.svg') }}">
                             <div class="form-text">{{ $help }}</div>
                             @error($field)<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            @include('admin.components.media-picker', [
+                                'inputName' => $field,
+                                'previewUrl' => $websiteSetting->{$field} ? asset($websiteSetting->{$field}) : null,
+                                'label' => $label,
+                                'acceptType' => 'image',
+                            ])
                         </div>
                     @endforeach
                 </div>

@@ -110,6 +110,12 @@
                     >
                     <div class="form-text">JPG, PNG, or WebP. Maximum 4 MB.</div>
                     @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    @include('admin.components.media-picker', [
+                        'inputName' => 'image',
+                        'previewUrl' => $aboutSection->image ? asset($aboutSection->image) : null,
+                        'label' => 'About image',
+                        'acceptType' => 'image',
+                    ])
                 </div>
 
                 <input name="status" type="hidden" value="0">

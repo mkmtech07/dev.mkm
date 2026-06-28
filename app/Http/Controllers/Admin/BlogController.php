@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BlogRequest;
 use App\Models\Blog;
 use App\Models\BlogCategory;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,14 +53,17 @@ class BlogController extends Controller
 
     public function store(BlogRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['featured_image', 'og_image']);
+        $fields = ['featured_image', 'og_image'];
+        $data = $request->safe()->except([...$fields, ...MediaPicker::fieldInputs($fields)]);
         $uploadedImages = [];
 
         try {
-            foreach (['featured_image', 'og_image'] as $field) {
+            foreach ($fields as $field) {
                 if ($request->hasFile($field)) {
                     $data[$field] = PublicImage::store($request->file($field), 'blogs');
                     $uploadedImages[] = $data[$field];
+                } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                    $data[$field] = $selectedPath;
                 }
             }
 
@@ -86,15 +90,24 @@ class BlogController extends Controller
 
     public function update(BlogRequest $request, Blog $blog): RedirectResponse
     {
-        $data = $request->safe()->except(['featured_image', 'og_image']);
+        $fields = ['featured_image', 'og_image'];
+        $data = $request->safe()->except([...$fields, ...MediaPicker::fieldInputs($fields)]);
         $newImages = [];
         $oldImages = [];
 
         try {
-            foreach (['featured_image', 'og_image'] as $field) {
+            foreach ($fields as $field) {
                 if ($request->hasFile($field)) {
                     $data[$field] = PublicImage::store($request->file($field), 'blogs');
                     $newImages[] = $data[$field];
+                    $oldImages[] = $blog->{$field};
+                } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                    $data[$field] = $selectedPath;
+                    if ($blog->{$field} && $blog->{$field} !== $selectedPath) {
+                        $oldImages[] = $blog->{$field};
+                    }
+                } elseif (MediaPicker::shouldClear($request, $field)) {
+                    $data[$field] = null;
                     $oldImages[] = $blog->{$field};
                 }
             }

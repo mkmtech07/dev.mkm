@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FooterSocialLink extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const TARGETS = ['_self', '_blank'];
 
-    protected $fillable = ['platform', 'url', 'icon', 'target', 'status', 'sort_order'];
+    protected $fillable = ['tenant_id', 'platform', 'url', 'icon', 'target', 'status', 'sort_order'];
 
     protected function casts(): array
     {

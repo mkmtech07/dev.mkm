@@ -58,6 +58,14 @@
                         <input class="form-control @error('image') is-invalid @enderror" id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,.svg" data-image-input data-preview="maintenance-image-preview" data-empty="maintenance-image-empty" @disabled(! $canEditMaintenance)>
                         <div class="form-text">JPG, PNG, WebP, or SVG. Max 2 MB.</div>
                         @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        @if ($canEditMaintenance)
+                            @include('admin.components.media-picker', [
+                                'inputName' => 'image',
+                                'previewUrl' => $maintenanceSetting->image ? asset($maintenanceSetting->image) : null,
+                                'label' => 'Maintenance image',
+                                'acceptType' => 'image',
+                            ])
+                        @endif
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">

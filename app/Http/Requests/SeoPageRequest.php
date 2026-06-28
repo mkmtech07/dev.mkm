@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\SeoPage;
+use App\Support\MediaPicker;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -58,6 +59,7 @@ class SeoPageRequest extends FormRequest
             'og_title' => ['nullable', 'string', 'max:255'],
             'og_description' => ['nullable', 'string', 'max:500'],
             'og_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            ...MediaPicker::validationRules(['og_image', 'twitter_image']),
             'twitter_title' => ['nullable', 'string', 'max:255'],
             'twitter_description' => ['nullable', 'string', 'max:500'],
             'twitter_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],

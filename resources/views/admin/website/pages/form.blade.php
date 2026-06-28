@@ -89,6 +89,27 @@
     </div>
 
     <div class="col-xl-4">
+        @if($page->exists && auth()->user()->hasPermission('page_blocks.view'))
+            <div class="card content-card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-1">Page builder</h2>
+                    <p class="text-secondary small mb-0">Optional blocks render before the fallback page content.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                        <span class="text-secondary">Blocks assigned</span>
+                        <span class="badge text-bg-primary">{{ $page->blocks_count ?? 0 }}</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-primary" href="{{ route('admin.website.page-blocks.index', ['page_id' => $page->id]) }}">Manage Blocks</a>
+                        @if(auth()->user()->hasPermission('page_blocks.create'))
+                            <a class="btn btn-light" href="{{ route('admin.website.page-blocks.create', ['page_id' => $page->id]) }}">Add Block</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="card content-card mb-4">
             <div class="card-header">
                 <h2 class="h5 mb-1">Featured image</h2>
@@ -110,6 +131,12 @@
                 >
                 <div class="form-text">JPG, PNG, or WebP. Maximum 4 MB.</div>
                 @error('featured_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @include('admin.components.media-picker', [
+                    'inputName' => 'featured_image',
+                    'previewUrl' => $page->featured_image ? asset($page->featured_image) : null,
+                    'label' => 'Featured image',
+                    'acceptType' => 'image',
+                ])
             </div>
         </div>
 

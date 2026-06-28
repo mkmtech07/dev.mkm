@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TeamMemberRequest;
 use App\Models\TeamMember;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,10 +46,12 @@ class TeamMemberController extends Controller
 
     public function store(TeamMemberRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'team');
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
         }
 
         TeamMember::create($data);
@@ -64,11 +67,17 @@ class TeamMemberController extends Controller
 
     public function update(TeamMemberRequest $request, TeamMember $teamMember): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
         $oldImage = null;
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'team');
+            $oldImage = $teamMember->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            $oldImage = $teamMember->image !== $selectedPath ? $teamMember->image : null;
+        } elseif (MediaPicker::shouldClear($request, 'image')) {
+            $data['image'] = null;
             $oldImage = $teamMember->image;
         }
 

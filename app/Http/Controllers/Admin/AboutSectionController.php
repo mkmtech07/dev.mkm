@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AboutSectionRequest;
 use App\Models\AboutSection;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,10 +42,12 @@ class AboutSectionController extends Controller
 
     public function store(AboutSectionRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'about');
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
         }
 
         DB::transaction(function () use ($data) {
@@ -66,11 +69,17 @@ class AboutSectionController extends Controller
 
     public function update(AboutSectionRequest $request, AboutSection $aboutSection): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
         $oldImage = null;
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'about');
+            $oldImage = $aboutSection->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            $oldImage = $aboutSection->image !== $selectedPath ? $aboutSection->image : null;
+        } elseif (MediaPicker::shouldClear($request, 'image')) {
+            $data['image'] = null;
             $oldImage = $aboutSection->image;
         }
 

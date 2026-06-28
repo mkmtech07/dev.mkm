@@ -59,6 +59,17 @@
                 </a>
                 @endif
 
+                @if($adminUser->hasPermission('tenants.view'))
+                <a class="nav-link {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}"
+                   href="{{ route('admin.tenants.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8M8 12h8M8 16h4"/>
+                    </svg>
+                    Client Demos
+                </a>
+                @endif
+
                 @if($adminUser->hasPermission('email_templates.view'))
                 <a class="nav-link {{ request()->routeIs('admin.email-templates.*') ? 'active' : '' }}"
                    href="{{ route('admin.email-templates.index') }}">
@@ -148,6 +159,17 @@
                         <path d="M3 9h18M9 9v12M13 13h4M13 17h4"/>
                     </svg>
                     Homepage Sections
+                </a>
+                @endif
+
+                @if($adminUser->hasPermission('page_blocks.view'))
+                <a class="nav-link {{ request()->routeIs('admin.website.page-blocks.*') ? 'active' : '' }}"
+                   href="{{ route('admin.website.page-blocks.index') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                        <path d="M7 8h10M7 12h4M13 12h4M7 16h10"/>
+                    </svg>
+                    Page Blocks
                 </a>
                 @endif
 
@@ -426,6 +448,20 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
+                @if($adminUser->hasPermission('tenants.switch') && $adminTenants->isNotEmpty())
+                <form class="d-none d-md-flex align-items-center gap-2" method="POST" action="{{ route('admin.tenants.switch') }}">
+                    @csrf
+                    <label class="small text-secondary mb-0" for="admin_tenant_id">Tenant</label>
+                    <select class="form-select form-select-sm" id="admin_tenant_id" name="tenant_id" onchange="this.form.submit()" style="min-width: 180px;">
+                        @foreach($adminTenants as $tenantOption)
+                            <option value="{{ $tenantOption->id }}" @selected($adminCurrentTenant?->id === $tenantOption->id)>
+                                {{ $tenantOption->name }}{{ $tenantOption->is_demo ? ' (Demo)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+                @endif
+
                 @if($adminUser->hasPermission('notifications.view'))
                 <div class="dropdown" data-notification-dropdown
                      data-index-url="{{ route('admin.api.notifications.index') }}"

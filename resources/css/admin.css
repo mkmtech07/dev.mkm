@@ -263,6 +263,32 @@ body {
     border-bottom: 0;
 }
 
+.media-picker-card {
+    min-height: 100%;
+}
+
+.media-picker-preview {
+    display: grid;
+    height: 10rem;
+    place-items: center;
+    overflow: hidden;
+}
+
+.media-picker-thumb {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.media-picker-document {
+    color: var(--bs-secondary-color);
+    display: grid;
+    font-weight: 700;
+    height: 100%;
+    place-items: center;
+    width: 100%;
+}
+
 .sidebar-overlay {
     background: rgba(15, 23, 42, 0.5);
     display: none;

@@ -43,6 +43,7 @@
                     <tr>
                         <th scope="col">Page</th>
                         <th scope="col">Type</th>
+                        <th scope="col">Blocks</th>
                         <th scope="col">Menu</th>
                         <th scope="col">Status</th>
                         <th scope="col">Order</th>
@@ -76,6 +77,15 @@
                                 <div class="small text-secondary mt-1">{{ $page->template }}</div>
                             </td>
                             <td>
+                                @if(auth()->user()->hasPermission('page_blocks.view'))
+                                    <a class="badge text-bg-primary text-decoration-none" href="{{ route('admin.website.page-blocks.index', ['page_id' => $page->id]) }}">
+                                        {{ $page->blocks_count ?? 0 }}
+                                    </a>
+                                @else
+                                    <span class="badge text-bg-light">{{ $page->blocks_count ?? 0 }}</span>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="badge {{ $page->show_in_menu ? 'text-bg-primary' : 'text-bg-light' }}">
                                     {{ $page->show_in_menu ? 'Shown' : 'Hidden' }}
                                 </span>
@@ -95,6 +105,9 @@
                             </td>
                             <td>{{ $page->sort_order }}</td>
                             <td class="text-end text-nowrap">
+                                @if(auth()->user()->hasPermission('page_blocks.view'))
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.website.page-blocks.index', ['page_id' => $page->id]) }}">Blocks</a>
+                                @endif
                                 <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.pages.edit', $page) }}">Edit</a>
                                 <form
                                     class="d-inline"
@@ -110,7 +123,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td class="py-5 text-center text-secondary" colspan="6">
+                            <td class="py-5 text-center text-secondary" colspan="7">
                                 {{ $search !== '' ? 'No pages match your search.' : 'No dynamic pages have been created yet.' }}
                             </td>
                         </tr>

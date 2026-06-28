@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MediaPicker;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -29,6 +30,7 @@ class AboutSectionRequest extends FormRequest
             'subtitle' => ['nullable', 'string', 'max:500'],
             'description' => ['required', 'string', 'max:10000'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            ...MediaPicker::validationRules(['image']),
             'mission' => ['nullable', 'string', 'max:5000'],
             'vision' => ['nullable', 'string', 'max:5000'],
             'years_of_experience' => ['nullable', 'integer', 'min:0'],

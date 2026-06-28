@@ -13,6 +13,7 @@ class RolePermissionSeeder extends Seeder
     /** @var array<string, array<int, string>> */
     private const MODULES = [
         'Dashboard' => ['dashboard.view'],
+        'Tenants' => ['tenants.view', 'tenants.create', 'tenants.edit', 'tenants.delete', 'tenants.settings', 'tenants.switch'],
         'Pages' => ['pages.view', 'pages.create', 'pages.edit', 'pages.delete'],
         'Blog' => ['blog.view', 'blog.create', 'blog.edit', 'blog.delete'],
         'Blog Categories' => ['blog_categories.view', 'blog_categories.create', 'blog_categories.edit', 'blog_categories.delete'],
@@ -28,8 +29,10 @@ class RolePermissionSeeder extends Seeder
         'Theme Settings' => ['theme_settings.view', 'theme_settings.edit'],
         'Maintenance' => ['maintenance.view', 'maintenance.edit'],
         'Homepage Sections' => ['homepage_sections.view', 'homepage_sections.create', 'homepage_sections.edit', 'homepage_sections.delete'],
+        'Page Blocks' => ['page_blocks.view', 'page_blocks.create', 'page_blocks.edit', 'page_blocks.delete'],
         'Hero Sliders' => ['hero_sliders.view', 'hero_sliders.create', 'hero_sliders.edit', 'hero_sliders.delete'],
         'Media Library' => ['media_library.view', 'media_library.create', 'media_library.edit', 'media_library.delete'],
+        'Media Picker' => ['media_picker.use'],
         'SEO' => ['seo.view', 'seo.create', 'seo.edit', 'seo.delete'],
         'Leads' => ['leads.view', 'leads.create', 'leads.edit', 'leads.delete'],
         'Newsletter' => ['newsletter.view', 'newsletter.create', 'newsletter.edit', 'newsletter.delete'],
@@ -84,7 +87,7 @@ class RolePermissionSeeder extends Seeder
                 'editor' => $permissions->filter(fn (Permission $permission) => in_array($permission->module, [
                     'Dashboard', 'Pages', 'Blog', 'Blog Categories', 'Services', 'About', 'Testimonials',
                     'Team Members', 'Gallery', 'FAQ', 'Menus', 'Footer', 'Homepage Sections',
-                    'Hero Sliders', 'Media Library', 'SEO', 'Maintenance', 'Email Templates',
+                    'Page Blocks', 'Hero Sliders', 'Media Library', 'Media Picker', 'SEO', 'Maintenance', 'Email Templates',
                 ], true)),
                 'manager' => $permissions->filter(fn (Permission $permission) => in_array($permission->module, [
                     'Dashboard', 'Leads', 'Newsletter', 'Contact Messages', 'Notifications', 'Activity Logs',

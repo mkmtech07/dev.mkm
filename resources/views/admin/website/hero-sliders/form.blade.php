@@ -93,6 +93,12 @@
                     >
                     <div class="form-text">JPG, PNG, or WebP. Maximum 4 MB.</div>
                     @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    @include('admin.components.media-picker', [
+                        'inputName' => 'image',
+                        'previewUrl' => $heroSlider->image ? asset($heroSlider->image) : null,
+                        'label' => 'Background image',
+                        'acceptType' => 'image',
+                    ])
                 </div>
 
                 <div class="mb-4">

@@ -3,10 +3,12 @@ import DOMPurify from 'dompurify';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import BaseLoader from '../components/base/BaseLoader.vue';
+import PageBlockRenderer from '../components/PageBlockRenderer.vue';
 import { applySeo, loadRouteSeo, siteSettings } from '../siteSettings';
 
 const route = useRoute();
 const page = ref(null);
+const pageBlocks = ref([]);
 const loading = ref(true);
 const notFound = ref(false);
 const errorMessage = ref('');
@@ -33,6 +35,7 @@ const loadPage = async (slug) => {
 
     loading.value = true;
     page.value = null;
+    pageBlocks.value = [];
     notFound.value = false;
     errorMessage.value = '';
 
@@ -58,6 +61,22 @@ const loadPage = async (slug) => {
             page.value.meta_title || page.value.title,
             page.value.meta_description || '',
         );
+
+        try {
+            const blocksResponse = await fetch(`/api/pages/${encodeURIComponent(slug)}/blocks`, {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal,
+            });
+
+            if (blocksResponse.ok) {
+                const blocksPayload = await blocksResponse.json();
+                pageBlocks.value = Array.isArray(blocksPayload.blocks) ? blocksPayload.blocks : [];
+            }
+        } catch (blocksError) {
+            if (blocksError.name !== 'AbortError') {
+                pageBlocks.value = [];
+            }
+        }
     } catch (error) {
         if (error.name !== 'AbortError') {
             errorMessage.value = error.message || 'Unable to load this page right now.';
@@ -82,40 +101,60 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <section class="dynamic-page section-padding bg-white">
-        <div class="container">
-            <BaseLoader v-if="loading" />
+    <div class="dynamic-page bg-white">
+        <section v-if="loading" class="section-padding">
+            <div class="container">
+                <BaseLoader />
+            </div>
+        </section>
 
-            <div v-else-if="notFound" class="text-center py-5">
+        <section v-else-if="notFound" class="section-padding">
+            <div class="container text-center py-5">
                 <p class="display-1 fw-bold text-primary mb-2">404</p>
                 <h1 class="h2 mb-3">Page not found</h1>
                 <p class="text-secondary mb-4">The page may have moved, been unpublished, or never existed.</p>
                 <RouterLink class="btn btn-primary" to="/">Back to home</RouterLink>
             </div>
+        </section>
 
-            <div v-else-if="errorMessage" class="alert alert-danger text-center" role="alert">
-                {{ errorMessage }}
+        <section v-else-if="errorMessage" class="section-padding">
+            <div class="container">
+                <div class="alert alert-danger text-center" role="alert">
+                    {{ errorMessage }}
+                </div>
             </div>
+        </section>
 
-            <article v-else-if="page">
-                <header class="mx-auto mb-5 text-center page-header">
-                    <h1 class="display-5 fw-bold mb-3">{{ page.title }}</h1>
-                    <p v-if="page.meta_description" class="lead text-secondary mb-0">
-                        {{ page.meta_description }}
-                    </p>
-                </header>
+        <template v-else-if="page && pageBlocks.length">
+            <PageBlockRenderer
+                v-for="(block, index) in pageBlocks"
+                :key="`${block.block_key || block.type}-${index}`"
+                :block="block"
+            />
+        </template>
 
-                <img
-                    v-if="page.featured_image"
-                    class="featured-image img-fluid rounded-4 shadow-sm mb-5"
-                    :src="page.featured_image"
-                    :alt="page.title"
-                >
+        <section v-else-if="page" class="section-padding">
+            <div class="container">
+                <article>
+                    <header class="mx-auto mb-5 text-center page-header">
+                        <h1 class="display-5 fw-bold mb-3">{{ page.title }}</h1>
+                        <p v-if="page.meta_description" class="lead text-secondary mb-0">
+                            {{ page.meta_description }}
+                        </p>
+                    </header>
 
-                <div class="page-content mx-auto" v-html="safeContent"></div>
-            </article>
-        </div>
-    </section>
+                    <img
+                        v-if="page.featured_image"
+                        class="featured-image img-fluid rounded-4 shadow-sm mb-5"
+                        :src="page.featured_image"
+                        :alt="page.title"
+                    >
+
+                    <div class="page-content mx-auto" v-html="safeContent"></div>
+                </article>
+            </div>
+        </section>
+    </div>
 </template>
 
 <style scoped>

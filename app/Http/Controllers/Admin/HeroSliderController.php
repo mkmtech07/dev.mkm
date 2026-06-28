@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HeroSliderRequest;
 use App\Models\HeroSlider;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,10 +44,12 @@ class HeroSliderController extends Controller
 
     public function store(HeroSliderRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'hero-sliders');
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
         }
 
         HeroSlider::create($data);
@@ -62,11 +65,17 @@ class HeroSliderController extends Controller
 
     public function update(HeroSliderRequest $request, HeroSlider $heroSlider): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
         $oldImage = null;
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'hero-sliders');
+            $oldImage = $heroSlider->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            $oldImage = $heroSlider->image !== $selectedPath ? $heroSlider->image : null;
+        } elseif (MediaPicker::shouldClear($request, 'image')) {
+            $data['image'] = null;
             $oldImage = $heroSlider->image;
         }
 

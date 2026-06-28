@@ -11,10 +11,12 @@ use App\Models\MaintenanceSetting;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\ThemeSetting;
+use App\Models\Tenant;
 use App\Models\WebsiteSetting;
 use App\Models\SeoSetting;
 use App\Services\ActivityLogger;
 use App\Services\AdminNotificationService;
+use App\Services\TenantManager;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ActivityLogger::class);
+        $this->app->singleton(TenantManager::class);
     }
 
     public function boot(): void
@@ -38,11 +41,14 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.admin', function ($view): void {
             $notifications = app(AdminNotificationService::class);
+            $tenants = app(TenantManager::class);
             $user = Auth::user();
 
             $view->with('websiteSettings', $this->websiteSettings())
                 ->with('adminNotificationUnreadCount', $notifications->unreadCount($user))
-                ->with('adminHeaderNotifications', $notifications->latestUnread($user, 5));
+                ->with('adminHeaderNotifications', $notifications->latestUnread($user, 5))
+                ->with('adminTenants', $this->adminTenants())
+                ->with('adminCurrentTenant', $tenants->current());
         });
 
         View::composer('frontend.app', function ($view): void {
@@ -175,5 +181,16 @@ class AppServiceProvider extends ServiceProvider
             'meta_description' => 'Professional website powered by Laravel and Vue',
             'status' => true,
         ]);
+    }
+
+    private function adminTenants()
+    {
+        if (! Schema::hasTable('tenants')) {
+            return collect();
+        }
+
+        return Tenant::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'status', 'is_demo']);
     }
 }

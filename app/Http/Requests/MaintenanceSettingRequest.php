@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\MaintenanceSetting;
+use App\Support\MediaPicker;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -60,6 +61,7 @@ class MaintenanceSettingRequest extends FormRequest
             'title' => ['nullable', 'string', 'max:255'],
             'message' => ['nullable', 'string'],
             'image' => ['nullable', File::image(allowSvg: true)->max(2048), 'mimes:jpg,jpeg,png,webp,svg'],
+            ...MediaPicker::validationRules(['image']),
             'button_text' => ['nullable', 'string', 'max:255'],
             'button_url' => ['nullable', 'string', 'max:500', $this->safeUrl(...)],
             'start_at' => ['nullable', 'date'],

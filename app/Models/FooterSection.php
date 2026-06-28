@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,11 +10,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FooterSection extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const TYPES = ['about', 'links', 'contact', 'social', 'newsletter', 'custom'];
 
-    protected $fillable = ['title', 'type', 'content', 'status', 'sort_order'];
+    protected $fillable = ['tenant_id', 'title', 'type', 'content', 'status', 'sort_order'];
 
     protected function casts(): array
     {

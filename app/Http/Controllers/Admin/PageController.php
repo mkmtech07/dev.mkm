@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PageRequest;
 use App\Models\Page;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class PageController extends Controller
         $search = trim((string) $request->query('search'));
 
         $pages = Page::query()
+            ->withCount('blocks')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('title', 'like', "%{$search}%")
@@ -47,10 +49,12 @@ class PageController extends Controller
 
     public function store(PageRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['featured_image']);
+        $data = $request->safe()->except(['featured_image', ...MediaPicker::fieldInputs(['featured_image'])]);
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = PublicImage::store($request->file('featured_image'), 'pages');
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'featured_image')) {
+            $data['featured_image'] = $selectedPath;
         }
 
         Page::create($data);
@@ -61,16 +65,24 @@ class PageController extends Controller
 
     public function edit(Page $page): View
     {
+        $page->loadCount('blocks');
+
         return view('admin.website.pages.edit', compact('page'));
     }
 
     public function update(PageRequest $request, Page $page): RedirectResponse
     {
-        $data = $request->safe()->except(['featured_image']);
+        $data = $request->safe()->except(['featured_image', ...MediaPicker::fieldInputs(['featured_image'])]);
         $oldImage = null;
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = PublicImage::store($request->file('featured_image'), 'pages');
+            $oldImage = $page->featured_image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'featured_image')) {
+            $data['featured_image'] = $selectedPath;
+            $oldImage = $page->featured_image !== $selectedPath ? $page->featured_image : null;
+        } elseif (MediaPicker::shouldClear($request, 'featured_image')) {
+            $data['featured_image'] = null;
             $oldImage = $page->featured_image;
         }
 

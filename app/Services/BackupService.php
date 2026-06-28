@@ -19,6 +19,7 @@ use ZipArchive;
 class BackupService
 {
     public const DISK = 'local';
+
     public const DIRECTORY = 'backups';
 
     /**
@@ -94,6 +95,7 @@ class BackupService
     {
         $sources = [
             storage_path('app/public') => 'uploads/storage',
+            public_path('storage/media-library') => 'uploads/media-library',
             public_path('assets/images') => 'uploads/public-assets/images',
         ];
         $added = 0;
@@ -116,7 +118,7 @@ class BackupService
     private function createContentExport(ZipArchive $zip, string $temporaryDirectory): void
     {
         $tables = [
-            'pages', 'blogs', 'blog_categories', 'services', 'galleries', 'faqs', 'testimonials',
+            'pages', 'page_blocks', 'blogs', 'blog_categories', 'services', 'galleries', 'faqs', 'testimonials',
             'menus', 'menu_items', 'footer_settings', 'footer_sections', 'footer_links',
             'footer_social_links', 'website_settings', 'homepage_sections', 'hero_sliders',
             'about_sections', 'team_members', 'media_files', 'seo_pages', 'seo_settings',

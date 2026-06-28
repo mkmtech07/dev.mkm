@@ -57,7 +57,7 @@ class PublicSeoController extends Controller
         abort_unless($settings->status && $settings->sitemap_status, 404);
 
         $xml = Cache::remember(
-            SeoManager::SITEMAP_CACHE_KEY,
+            $seoManager->sitemapCacheKey(),
             max(1, $settings->sitemap_cache_minutes) * 60,
             fn () => $this->buildSitemap($seoManager, $settings->default_robots_index)
         );

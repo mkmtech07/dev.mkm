@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MediaPicker;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -41,6 +42,7 @@ class PageRequest extends FormRequest
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
             'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            ...MediaPicker::validationRules(['featured_image']),
             'content' => ['required', 'string'],
             'page_type' => ['required', Rule::in(['default', 'page', 'landing'])],
             'template' => ['required', 'string', 'max:100'],

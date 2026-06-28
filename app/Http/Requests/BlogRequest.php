@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MediaPicker;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -46,6 +47,7 @@ class BlogRequest extends FormRequest
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => ['required', 'string'],
             'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            ...MediaPicker::validationRules(['featured_image', 'og_image']),
             'author' => ['nullable', 'string', 'max:255'],
             'publish_at' => ['nullable', 'date'],
             'is_featured' => ['required', 'boolean'],

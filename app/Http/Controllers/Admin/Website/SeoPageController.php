@@ -11,10 +11,10 @@ use App\Models\Page;
 use App\Models\SeoPage;
 use App\Models\Service;
 use App\Services\SeoManager;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Throwable;
 
@@ -50,14 +50,17 @@ class SeoPageController extends Controller
 
     public function store(SeoPageRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['og_image', 'twitter_image']);
+        $fields = ['og_image', 'twitter_image'];
+        $data = $request->safe()->except([...$fields, ...MediaPicker::fieldInputs($fields)]);
         $uploads = [];
 
         try {
-            foreach (['og_image', 'twitter_image'] as $field) {
+            foreach ($fields as $field) {
                 if ($request->hasFile($field)) {
                     $data[$field] = PublicImage::store($request->file($field), 'seo');
                     $uploads[] = $data[$field];
+                } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                    $data[$field] = $selectedPath;
                 }
             }
             SeoPage::create($data);
@@ -68,7 +71,7 @@ class SeoPageController extends Controller
             throw $exception;
         }
 
-        Cache::forget(SeoManager::SITEMAP_CACHE_KEY);
+        app(SeoManager::class)->forgetSitemapCache();
 
         return to_route('admin.website.seo.pages.index')->with('success', 'SEO page created successfully.');
     }
@@ -80,15 +83,24 @@ class SeoPageController extends Controller
 
     public function update(SeoPageRequest $request, SeoPage $seoPage): RedirectResponse
     {
-        $data = $request->safe()->except(['og_image', 'twitter_image']);
+        $fields = ['og_image', 'twitter_image'];
+        $data = $request->safe()->except([...$fields, ...MediaPicker::fieldInputs($fields)]);
         $newImages = [];
         $oldImages = [];
 
         try {
-            foreach (['og_image', 'twitter_image'] as $field) {
+            foreach ($fields as $field) {
                 if ($request->hasFile($field)) {
                     $data[$field] = PublicImage::store($request->file($field), 'seo');
                     $newImages[] = $data[$field];
+                    $oldImages[] = $seoPage->{$field};
+                } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                    $data[$field] = $selectedPath;
+                    if ($seoPage->{$field} && $seoPage->{$field} !== $selectedPath) {
+                        $oldImages[] = $seoPage->{$field};
+                    }
+                } elseif (MediaPicker::shouldClear($request, $field)) {
+                    $data[$field] = null;
                     $oldImages[] = $seoPage->{$field};
                 }
             }
@@ -103,7 +115,7 @@ class SeoPageController extends Controller
         foreach ($oldImages as $image) {
             PublicImage::delete($image);
         }
-        Cache::forget(SeoManager::SITEMAP_CACHE_KEY);
+        app(SeoManager::class)->forgetSitemapCache();
 
         return to_route('admin.website.seo.pages.index')->with('success', 'SEO page updated successfully.');
     }
@@ -115,7 +127,7 @@ class SeoPageController extends Controller
         foreach ($images as $image) {
             PublicImage::delete($image);
         }
-        Cache::forget(SeoManager::SITEMAP_CACHE_KEY);
+        app(SeoManager::class)->forgetSitemapCache();
 
         return back()->with('success', 'SEO page deleted successfully.');
     }
@@ -123,7 +135,7 @@ class SeoPageController extends Controller
     public function toggleStatus(SeoPage $seoPage): RedirectResponse
     {
         $seoPage->update(['status' => ! $seoPage->status]);
-        Cache::forget(SeoManager::SITEMAP_CACHE_KEY);
+        app(SeoManager::class)->forgetSitemapCache();
 
         return back()->with('success', 'SEO page status updated successfully.');
     }

@@ -9,11 +9,22 @@ use App\Models\SeoPage;
 use App\Models\SeoSetting;
 use App\Models\Service;
 use App\Models\WebsiteSetting;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 class SeoManager
 {
     public const SITEMAP_CACHE_KEY = 'seo.sitemap.xml';
+
+    public function sitemapCacheKey(): string
+    {
+        return self::SITEMAP_CACHE_KEY.'.tenant.'.app(TenantManager::class)->cacheKeySuffix();
+    }
+
+    public function forgetSitemapCache(): void
+    {
+        Cache::forget($this->sitemapCacheKey());
+    }
 
     public function settings(bool $create = false): SeoSetting
     {
@@ -122,7 +133,10 @@ class SeoManager
 
     public function absoluteUrl(string $path): string
     {
-        return rtrim((string) config('app.url', request()->root()), '/').'/'.ltrim($path, '/');
+        $tenant = app(TenantManager::class)->current();
+        $base = $tenant ? $tenant->publicUrl() : (string) config('app.url', request()->root());
+
+        return rtrim($base, '/').'/'.ltrim($path, '/');
     }
 
     public function publicImage(?string $path): ?string

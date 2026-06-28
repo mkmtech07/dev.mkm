@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TestimonialRequest;
 use App\Models\Testimonial;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,10 +49,12 @@ class TestimonialController extends Controller
 
     public function store(TestimonialRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'testimonials');
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
         }
 
         Testimonial::create($data);
@@ -67,11 +70,17 @@ class TestimonialController extends Controller
 
     public function update(TestimonialRequest $request, Testimonial $testimonial): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
         $oldImage = null;
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'testimonials');
+            $oldImage = $testimonial->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            $oldImage = $testimonial->image !== $selectedPath ? $testimonial->image : null;
+        } elseif (MediaPicker::shouldClear($request, 'image')) {
+            $data['image'] = null;
             $oldImage = $testimonial->image;
         }
 

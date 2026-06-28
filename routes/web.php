@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AboutSectionController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\Api\AdminNotificationApiController;
+use App\Http\Controllers\Admin\Api\MediaPickerController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\BackupController;
@@ -24,6 +25,8 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\TenantController;
+use App\Http\Controllers\Admin\TenantSettingController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TeamMemberController;
 use App\Http\Controllers\Admin\UserRoleController;
@@ -35,6 +38,7 @@ use App\Http\Controllers\Admin\Website\HomepageSectionController;
 use App\Http\Controllers\Admin\Website\MediaLibraryController;
 use App\Http\Controllers\Admin\Website\MaintenanceSettingController;
 use App\Http\Controllers\Admin\Website\SchemaMarkupController;
+use App\Http\Controllers\Admin\Website\PageBlockController;
 use App\Http\Controllers\Admin\Website\SeoPageController;
 use App\Http\Controllers\Admin\Website\SeoSettingController;
 use App\Http\Controllers\Admin\Website\ThemeSettingController;
@@ -56,6 +60,7 @@ use App\Models\Faq;
 use App\Models\Gallery;
 use App\Models\HeroSlider;
 use App\Models\Page;
+use App\Models\PageBlock;
 use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\TeamMember;
@@ -257,6 +262,38 @@ Route::get('/api/pages/{slug}', function (string $slug) {
     ]);
 })->where('slug', '[A-Za-z0-9-]+')->name('frontend.pages.show');
 
+Route::get('/api/pages/{slug}/blocks', function (string $slug) {
+    $page = Page::query()
+        ->where('slug', $slug)
+        ->where('status', true)
+        ->first();
+
+    if (! $page) {
+        return response()->json(['message' => 'Page not found.'], 404);
+    }
+
+    $blocks = $page->activeBlocks()
+        ->get()
+        ->map(fn (PageBlock $block) => [
+            'title' => $block->title,
+            'subtitle' => $block->subtitle,
+            'block_key' => $block->block_key,
+            'type' => $block->type,
+            'content' => $block->publicContent(),
+            'image' => $block->image ? asset($block->image) : null,
+            'background_image' => $block->background_image ? asset($block->background_image) : null,
+            'button_text' => $block->button_text,
+            'button_url' => $block->button_url,
+            'secondary_button_text' => $block->secondary_button_text,
+            'secondary_button_url' => $block->secondary_button_url,
+            'background_color' => $block->background_color,
+            'text_color' => $block->text_color,
+            'settings' => $block->settings ?: new stdClass(),
+        ]);
+
+    return response()->json(['blocks' => $blocks]);
+})->where('slug', '[A-Za-z0-9-]+')->name('frontend.pages.blocks.index');
+
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
 })->middleware(['auth', 'permission:dashboard.view'])->name('dashboard');
@@ -269,6 +306,38 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::redirect('/', '/admin/dashboard')->name('index');
         Route::view('/dashboard', 'admin.dashboard')->middleware('permission:dashboard.view')->name('dashboard');
+
+        Route::get('/tenants', [TenantController::class, 'index'])
+            ->middleware('permission:tenants.view')
+            ->name('tenants.index');
+        Route::get('/tenants/create', [TenantController::class, 'create'])
+            ->middleware('permission:tenants.create')
+            ->name('tenants.create');
+        Route::post('/tenants', [TenantController::class, 'store'])
+            ->middleware('permission:tenants.create')
+            ->name('tenants.store');
+        Route::post('/tenants/switch', [TenantController::class, 'switch'])
+            ->middleware('permission:tenants.switch')
+            ->name('tenants.switch');
+        Route::get('/tenants/{tenant}', [TenantController::class, 'show'])
+            ->middleware('permission:tenants.view')
+            ->name('tenants.show');
+        Route::get('/tenants/{tenant}/edit', [TenantController::class, 'edit'])
+            ->middleware('permission:tenants.edit')
+            ->name('tenants.edit');
+        Route::put('/tenants/{tenant}', [TenantController::class, 'update'])
+            ->middleware('permission:tenants.edit')
+            ->name('tenants.update');
+        Route::delete('/tenants/{tenant}', [TenantController::class, 'destroy'])
+            ->middleware('permission:tenants.delete')
+            ->name('tenants.destroy');
+        Route::get('/tenants/{tenant}/settings', [TenantSettingController::class, 'edit'])
+            ->middleware('permission:tenants.settings')
+            ->name('tenants.settings.edit');
+        Route::put('/tenants/{tenant}/settings', [TenantSettingController::class, 'update'])
+            ->middleware('permission:tenants.settings')
+            ->name('tenants.settings.update');
+
         Route::prefix('api/notifications')->name('api.notifications.')->group(function () {
             Route::get('/', [AdminNotificationApiController::class, 'index'])
                 ->middleware('permission:notifications.view')->name('index');
@@ -281,6 +350,12 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{notification}', [AdminNotificationApiController::class, 'destroy'])
                 ->middleware('permission:notifications.delete')->name('destroy');
         });
+        Route::get('/api/media-picker', [MediaPickerController::class, 'index'])
+            ->middleware('permission:media_library.view,media_picker.use')
+            ->name('api.media-picker.index');
+        Route::get('/api/media-picker/{mediaFile}', [MediaPickerController::class, 'show'])
+            ->middleware('permission:media_library.view,media_picker.use')
+            ->name('api.media-picker.show');
         Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllRead'])
             ->middleware('permission:notifications.mark_read')->name('notifications.mark-all-read');
         Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markRead'])
@@ -345,6 +420,16 @@ Route::middleware('auth')->group(function () {
             ->middlewareFor(['create', 'store'], 'permission:homepage_sections.create')
             ->middlewareFor(['edit', 'update'], 'permission:homepage_sections.edit')
             ->middlewareFor('destroy', 'permission:homepage_sections.delete');
+        Route::patch('/website/page-blocks/{pageBlock}/toggle-status', [PageBlockController::class, 'toggleStatus'])
+            ->middleware('permission:page_blocks.edit')
+            ->name('website.page-blocks.toggle-status');
+        Route::resource('/website/page-blocks', PageBlockController::class)
+            ->parameters(['page-blocks' => 'pageBlock'])
+            ->names('website.page-blocks')
+            ->middlewareFor(['index', 'show'], 'permission:page_blocks.view')
+            ->middlewareFor(['create', 'store'], 'permission:page_blocks.create')
+            ->middlewareFor(['edit', 'update'], 'permission:page_blocks.edit')
+            ->middlewareFor('destroy', 'permission:page_blocks.delete');
         Route::patch('/website/media-library/{mediaFile}/toggle-status', [MediaLibraryController::class, 'toggleStatus'])
             ->middleware('permission:media_library.edit')
             ->name('website.media-library.toggle-status');

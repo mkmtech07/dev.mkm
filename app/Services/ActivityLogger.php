@@ -110,8 +110,11 @@ class ActivityLogger
             'MailLog' => 'mail_logs',
             'ContactMessage' => 'contact_messages',
             'HomepageSection' => 'homepage_sections',
+            'PageBlock' => 'page_blocks',
             'HeroSlider' => 'hero_sliders',
             'BlogCategory' => 'blog', 'Blog' => 'blog',
+            'Tenant' => 'tenants',
+            'TenantSetting' => 'tenant_settings',
         ];
 
         return $map[$class] ?? Str::snake(Str::pluralStudly($class));

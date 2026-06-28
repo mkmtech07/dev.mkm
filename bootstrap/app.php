@@ -12,10 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            \App\Http\Middleware\ResolveTenant::class,
             \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
 
         $middleware->alias([
+            'tenant' => \App\Http\Middleware\ResolveTenant::class,
             'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
         ]);

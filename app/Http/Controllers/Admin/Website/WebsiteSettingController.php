@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Website;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WebsiteSettingRequest;
 use App\Models\WebsiteSetting;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -33,18 +34,28 @@ class WebsiteSettingController extends Controller
     public function update(WebsiteSettingRequest $request): RedirectResponse
     {
         $settings = $this->settings();
-        $data = $request->safe()->except(self::IMAGE_FIELDS);
+        $data = $request->safe()->except([...self::IMAGE_FIELDS, ...MediaPicker::fieldInputs(self::IMAGE_FIELDS)]);
         $oldImages = [];
 
         foreach (self::IMAGE_FIELDS as $field) {
-            if (! $request->hasFile($field)) {
-                continue;
-            }
+            if ($request->hasFile($field)) {
+                $data[$field] = PublicImage::store($request->file($field), 'settings');
 
-            $data[$field] = PublicImage::store($request->file($field), 'settings');
+                if ($settings->{$field}) {
+                    $oldImages[] = $settings->{$field};
+                }
+            } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                $data[$field] = $selectedPath;
 
-            if ($settings->{$field}) {
-                $oldImages[] = $settings->{$field};
+                if ($settings->{$field} && $settings->{$field} !== $selectedPath) {
+                    $oldImages[] = $settings->{$field};
+                }
+            } elseif (MediaPicker::shouldClear($request, $field)) {
+                $data[$field] = null;
+
+                if ($settings->{$field}) {
+                    $oldImages[] = $settings->{$field};
+                }
             }
         }
 

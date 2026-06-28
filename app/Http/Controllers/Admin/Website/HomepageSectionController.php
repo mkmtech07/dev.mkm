@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Website;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HomepageSectionRequest;
 use App\Models\HomepageSection;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,13 +48,16 @@ class HomepageSectionController extends Controller
 
     public function store(HomepageSectionRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image', 'background_image']);
-        $data['image'] = $request->hasFile('image')
-            ? PublicImage::store($request->file('image'), 'homepage-sections')
-            : null;
-        $data['background_image'] = $request->hasFile('background_image')
-            ? PublicImage::store($request->file('background_image'), 'homepage-sections')
-            : null;
+        $fields = ['image', 'background_image'];
+        $data = $request->safe()->except([...$fields, ...MediaPicker::fieldInputs($fields)]);
+
+        foreach ($fields as $field) {
+            if ($request->hasFile($field)) {
+                $data[$field] = PublicImage::store($request->file($field), 'homepage-sections');
+            } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                $data[$field] = $selectedPath;
+            }
+        }
 
         HomepageSection::create($data);
 
@@ -68,12 +72,21 @@ class HomepageSectionController extends Controller
 
     public function update(HomepageSectionRequest $request, HomepageSection $homepageSection): RedirectResponse
     {
-        $data = $request->safe()->except(['image', 'background_image']);
+        $fields = ['image', 'background_image'];
+        $data = $request->safe()->except([...$fields, ...MediaPicker::fieldInputs($fields)]);
         $oldImages = [];
 
-        foreach (['image', 'background_image'] as $field) {
+        foreach ($fields as $field) {
             if ($request->hasFile($field)) {
                 $data[$field] = PublicImage::store($request->file($field), 'homepage-sections');
+                $oldImages[] = $homepageSection->{$field};
+            } elseif ($selectedPath = MediaPicker::selectedPath($request, $field)) {
+                $data[$field] = $selectedPath;
+                if ($homepageSection->{$field} && $homepageSection->{$field} !== $selectedPath) {
+                    $oldImages[] = $homepageSection->{$field};
+                }
+            } elseif (MediaPicker::shouldClear($request, $field)) {
+                $data[$field] = null;
                 $oldImages[] = $homepageSection->{$field};
             }
         }

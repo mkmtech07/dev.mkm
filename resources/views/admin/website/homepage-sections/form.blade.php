@@ -80,6 +80,12 @@
                     <div class="form-text">JPG, PNG, WebP, or SVG. Maximum 2 MB.</div>
                     @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     <img id="image-preview" class="img-fluid rounded border mt-3 {{ $homepageSection->image ? '' : 'd-none' }}" src="{{ $homepageSection->image ? asset($homepageSection->image) : '' }}" alt="Section image preview">
+                    @include('admin.components.media-picker', [
+                        'inputName' => 'image',
+                        'previewUrl' => $homepageSection->image ? asset($homepageSection->image) : null,
+                        'label' => 'Section image',
+                        'acceptType' => 'image',
+                    ])
                 </div>
                 <div>
                     <label class="form-label" for="background_image">Background image</label>
@@ -87,6 +93,12 @@
                     <div class="form-text">JPG, PNG, or WebP. Maximum 4 MB.</div>
                     @error('background_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     <img id="background-preview" class="img-fluid rounded border mt-3 {{ $homepageSection->background_image ? '' : 'd-none' }}" src="{{ $homepageSection->background_image ? asset($homepageSection->background_image) : '' }}" alt="Background image preview">
+                    @include('admin.components.media-picker', [
+                        'inputName' => 'background_image',
+                        'previewUrl' => $homepageSection->background_image ? asset($homepageSection->background_image) : null,
+                        'label' => 'Background image',
+                        'acceptType' => 'image',
+                    ])
                 </div>
             </div>
         </div>

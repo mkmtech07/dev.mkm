@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ServiceRequest;
 use App\Models\Service;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,10 +45,12 @@ class ServiceController extends Controller
 
     public function store(ServiceRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'services');
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
         }
 
         Service::create($data);
@@ -63,11 +66,17 @@ class ServiceController extends Controller
 
     public function update(ServiceRequest $request, Service $service): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
         $oldImage = null;
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'services');
+            $oldImage = $service->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            $oldImage = $service->image !== $selectedPath ? $service->image : null;
+        } elseif (MediaPicker::shouldClear($request, 'image')) {
+            $data['image'] = null;
             $oldImage = $service->image;
         }
 

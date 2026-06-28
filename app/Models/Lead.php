@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lead extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     public const SOURCES = ['contact_form', 'quote_request', 'service_enquiry', 'phone_call', 'whatsapp', 'manual', 'other'];
     public const STATUSES = ['new', 'contacted', 'follow_up', 'interested', 'converted', 'not_interested', 'spam', 'closed'];
@@ -19,6 +20,7 @@ class Lead extends Model
     public const CONTACT_METHODS = ['phone', 'email', 'whatsapp', 'any'];
 
     protected $fillable = [
+        'tenant_id',
         'name', 'email', 'phone', 'whatsapp', 'company_name', 'subject', 'message', 'service_id',
         'source', 'status', 'priority', 'budget', 'preferred_contact_method', 'follow_up_date',
         'assigned_to', 'ip_address', 'user_agent', 'status_active',
@@ -27,6 +29,7 @@ class Lead extends Model
     protected function casts(): array
     {
         return [
+            'tenant_id' => 'integer',
             'service_id' => 'integer',
             'assigned_to' => 'integer',
             'follow_up_date' => 'datetime',

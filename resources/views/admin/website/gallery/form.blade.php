@@ -75,10 +75,16 @@
                         name="image"
                         type="file"
                         accept=".jpg,.jpeg,.png,.webp"
-                        @required(! $gallery->exists)
                     >
                     <div class="form-text">JPG, PNG, or WebP. Maximum 4 MB.</div>
                     @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    @include('admin.components.media-picker', [
+                        'inputName' => 'image',
+                        'previewUrl' => $gallery->image ? asset($gallery->image) : null,
+                        'label' => 'Image',
+                        'acceptType' => 'image',
+                        'allowClear' => false,
+                    ])
                 </div>
 
                 <div class="mb-4">

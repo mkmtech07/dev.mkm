@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MediaPicker;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,6 +27,7 @@ class FooterSettingRequest extends FormRequest
     {
         return [
             'footer_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            ...MediaPicker::validationRules(['footer_logo']),
             'remove_footer_logo' => ['required', 'boolean'],
             'footer_description' => ['nullable', 'string', 'max:5000'],
             'phone' => ['nullable', 'string', 'max:50'],

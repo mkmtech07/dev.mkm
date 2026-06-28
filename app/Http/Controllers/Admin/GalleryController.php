@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GalleryRequest;
 use App\Models\Gallery;
+use App\Support\MediaPicker;
 use App\Support\PublicImage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,8 +58,10 @@ class GalleryController extends Controller
 
     public function store(GalleryRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
-        $data['image'] = PublicImage::store($request->file('image'), 'gallery');
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
+        $data['image'] = $request->hasFile('image')
+            ? PublicImage::store($request->file('image'), 'gallery')
+            : MediaPicker::selectedPath($request, 'image');
 
         Gallery::create($data);
 
@@ -73,12 +76,15 @@ class GalleryController extends Controller
 
     public function update(GalleryRequest $request, Gallery $gallery): RedirectResponse
     {
-        $data = $request->safe()->except(['image']);
+        $data = $request->safe()->except(['image', ...MediaPicker::fieldInputs(['image'])]);
         $oldImage = null;
 
         if ($request->hasFile('image')) {
             $data['image'] = PublicImage::store($request->file('image'), 'gallery');
             $oldImage = $gallery->image;
+        } elseif ($selectedPath = MediaPicker::selectedPath($request, 'image')) {
+            $data['image'] = $selectedPath;
+            $oldImage = $gallery->image !== $selectedPath ? $gallery->image : null;
         }
 
         $gallery->update($data);

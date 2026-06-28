@@ -140,6 +140,12 @@
                 >
                 <div class="form-text">JPG, PNG, or WebP. Maximum 4 MB.</div>
                 @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @include('admin.components.media-picker', [
+                    'inputName' => 'image',
+                    'previewUrl' => $teamMember->image ? asset($teamMember->image) : null,
+                    'label' => 'Profile image',
+                    'acceptType' => 'image',
+                ])
             </div>
         </div>
 

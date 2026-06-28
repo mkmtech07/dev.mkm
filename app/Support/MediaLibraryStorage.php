@@ -9,7 +9,7 @@ use RuntimeException;
 
 class MediaLibraryStorage
 {
-    public const DISK = 'public';
+    public const DISK = 'media_library';
 
     public const DIRECTORY = 'media-library';
 

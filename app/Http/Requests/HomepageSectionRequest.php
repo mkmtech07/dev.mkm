@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\HomepageSection;
+use App\Support\MediaPicker;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -63,6 +64,7 @@ class HomepageSectionRequest extends FormRequest
                 File::image()->max(4096),
                 'mimes:jpg,jpeg,png,webp',
             ],
+            ...MediaPicker::validationRules(['image', 'background_image']),
             'background_color' => ['nullable', 'string', 'max:20', 'regex:/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             'text_color' => ['nullable', 'string', 'max:20', 'regex:/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             'status' => ['nullable', 'boolean'],
